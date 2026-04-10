@@ -57,6 +57,11 @@ function expandStage(el) {
 
 // QR scan zone
 function openScan() {
+  if (typeof window.__openQrUploader === 'function') {
+    window.__openQrUploader();
+    return;
+  }
+
   const zone = document.getElementById('scan-zone');
   zone.style.borderColor = '#2E9E50';
   zone.style.background = '#C8F0D4';
@@ -86,6 +91,8 @@ setInterval(updateClock, 8000);
 const FIREBASE_DATABASE_URL = 'https://lithe-transport-492814-r5-default-rtdb.europe-west1.firebasedatabase.app';
 const FIREBASE_AUDIENCE = '59621db6-6a59-43ec-8ce3-0a56d459f0db';
 const FIREBASE_SDK_VERSION = '12.12.0';
+const QRCODE_LIB_URL = 'https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js';
+const JSQR_LIB_URL = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
 
 const SUPPLY_CHAIN_STEPS = [
   'Ploughing',
@@ -822,6 +829,135 @@ function setupScannerPanel() {
 
   if (!scanInput || !scanBtn || !qrDataBox) return;
 
+  const ensureQrLibs = async () => {
+    if (!window.QRCode) {
+      await loadScriptOnce(QRCODE_LIB_URL);
+    }
+    if (!window.jsQR) {
+      await loadScriptOnce(JSQR_LIB_URL);
+    }
+  };
+
+  const formatRecordText = (record) =>
+    `name: ${record.name}\ntrackid: ${record.trackid}\naddress: ${record.address || record.village}\nvan_number: ${record.van_number || 'N/A'}\nstatus: ${record.status}\nroute: ${record.route}`;
+
+  const formatTrackingDetails = (record) => {
+    const updates = Array.isArray(record.updates) ? record.updates.slice(0, 5) : [];
+    const journeyCount = Array.isArray(record.journeyUpdates) ? record.journeyUpdates.length : 0;
+    const updatesText = updates.length ? updates.map((item) => `- ${item}`).join('\n') : '- No updates yet';
+    return `tracking_updates: ${journeyCount}\nrecent_updates:\n${updatesText}`;
+  };
+
+  const createQrPayload = (record) =>
+    JSON.stringify({
+      name: record.name,
+      trackid: record.trackid,
+      address: record.address || record.village,
+      van_number: record.van_number || 'N/A',
+      route: record.route,
+      status: record.status,
+    });
+
+  const toQrDataUrl = async (text) => {
+    await ensureQrLibs();
+    if (!window.QRCode || typeof window.QRCode.toDataURL !== 'function') {
+      const encoded = encodeURIComponent(text);
+      return `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encoded}`;
+    }
+
+    return new Promise((resolve, reject) => {
+      window.QRCode.toDataURL(
+        text,
+        { width: 220, margin: 1, color: { dark: '#1a6b2e', light: '#ffffff' } },
+        (error, url) => {
+          if (error) {
+            reject(error);
+            return;
+          }
+          resolve(url);
+        },
+      );
+    });
+  };
+
+  const showRecordData = async (record, withAutoQr, decodedSourceText) => {
+    const text = `${formatRecordText(record)}\n${formatTrackingDetails(record)}`;
+    qrDataBox.textContent = text;
+
+    if (!withAutoQr) {
+      return;
+    }
+
+    try {
+      const qrUrl = await toQrDataUrl(createQrPayload(record));
+      if (!qrUrl) {
+        return;
+      }
+
+      const source = decodedSourceText
+        ? `<div class="qr-source-note">decoded_qr: ${decodedSourceText.replace(/</g, '&lt;')}</div>`
+        : '';
+      qrDataBox.innerHTML = `
+        <div class="qr-readout">${text.replace(/\n/g, '<br>')}</div>
+        ${source}
+        <div class="qr-generated-wrap">
+          <img src="${qrUrl}" alt="Generated QR code" class="qr-generated-img" />
+          <a class="qr-download-link" href="${qrUrl}" download="${record.trackid || 'tracking-id'}.png">Download QR Code</a>
+        </div>
+      `;
+    } catch (error) {
+      qrDataBox.textContent = `${text}\n\nQR generation unavailable.`;
+    }
+  };
+
+  const getTrackIdFromDecodedText = (decodedText) => {
+    try {
+      const parsed = JSON.parse(decodedText);
+      if (parsed && parsed.trackid) {
+        return String(parsed.trackid).trim();
+      }
+    } catch (error) {
+      // ignore JSON parse errors and fallback to regex extraction
+    }
+
+    const match = decodedText.match(/TRK-\d+/i);
+    return match ? match[0].toUpperCase() : '';
+  };
+
+  const decodeQrFromFile = async (file) => {
+    await ensureQrLibs();
+    if (!window.jsQR) {
+      throw new Error('QR decoder not available');
+    }
+
+    const imageUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ''));
+      reader.onerror = () => reject(new Error('Failed to read image file'));
+      reader.readAsDataURL(file);
+    });
+
+    const image = await new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error('Invalid image file'));
+      img.src = imageUrl;
+    });
+
+    const canvas = document.createElement('canvas');
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const context = canvas.getContext('2d');
+    context.drawImage(image, 0, 0);
+    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    const code = window.jsQR(imageData.data, canvas.width, canvas.height);
+    if (!code || !code.data) {
+      throw new Error('No QR code detected');
+    }
+
+    return code.data;
+  };
+
   const generateTrackId = () => {
     const existing = new Set(
       getAllTrackingRecords()
@@ -842,7 +978,7 @@ function setupScannerPanel() {
     const rawValue = scanInput.value.trim();
     if (!rawValue) {
       qrDataBox.textContent = 'Please enter QR text or track ID.';
-      return;
+      return null;
     }
 
     const normalized = rawValue.replace(/^QR:/i, '');
@@ -851,16 +987,57 @@ function setupScannerPanel() {
 
     if (!found) {
       qrDataBox.textContent = `No data found for: ${normalized}`;
-      return;
+      return null;
     }
 
-    qrDataBox.textContent = `name: ${found.name}\ntrackid: ${found.trackid}\naddress: ${found.address || found.village}\nvan_number: ${found.van_number || 'N/A'}\nstatus: ${found.status}\nroute: ${found.route}`;
+    showRecordData(found, false);
 
     const owner = Object.entries(recordsByUser).find(([, records]) =>
       records.some((x) => x.trackid.toLowerCase() === found.trackid.toLowerCase()),
     );
     if (owner) {
       selectUserBySub(owner[0]);
+    }
+
+    return found;
+  };
+
+  let quickQrFileInput = document.getElementById('quickQrUploadInput');
+  if (!quickQrFileInput) {
+    quickQrFileInput = document.createElement('input');
+    quickQrFileInput.id = 'quickQrUploadInput';
+    quickQrFileInput.type = 'file';
+    quickQrFileInput.accept = 'image/*';
+    quickQrFileInput.className = 'hidden';
+    document.body.appendChild(quickQrFileInput);
+  }
+
+  window.__openQrUploader = () => {
+    quickQrFileInput.click();
+  };
+
+  quickQrFileInput.onchange = async () => {
+    const file = quickQrFileInput.files && quickQrFileInput.files[0];
+    if (!file) return;
+
+    try {
+      qrDataBox.textContent = 'Reading QR image...';
+      const decodedText = await decodeQrFromFile(file);
+      const trackId = getTrackIdFromDecodedText(decodedText);
+      if (!trackId) {
+        qrDataBox.textContent = `QR decoded:\n${decodedText}\n\nNo track ID found in this QR.`;
+        return;
+      }
+
+      scanInput.value = trackId;
+      const found = processScan();
+      if (found) {
+        await showRecordData(found, false, decodedText);
+      }
+    } catch (error) {
+      qrDataBox.textContent = 'Unable to read QR from image file. Please upload a clear QR image.';
+    } finally {
+      quickQrFileInput.value = '';
     }
   };
 
@@ -948,7 +1125,7 @@ function setupScannerPanel() {
         // Use push() so each new tracking record is appended instead of overwriting an existing key.
         await firebase.database().ref(`${audience}/objects/${subject}`).push(createdRecord);
         scanInput.value = createdRecord.trackid;
-        qrDataBox.textContent = `name: ${createdRecord.name}\ntrackid: ${createdRecord.trackid}\naddress: ${createdRecord.address}\nvan_number: ${createdRecord.van_number}\nstatus: ${createdRecord.status}\nroute: ${createdRecord.route}`;
+        await showRecordData(createdRecord, true);
         modal.classList.add('hidden');
       } catch (error) {
         qrDataBox.textContent = 'Failed to save tracking record. Please try again.';

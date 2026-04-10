@@ -23,6 +23,11 @@
 
 // ── Page navigation ──────────────────────────
 function showPage(id) {
+  if (typeof id === "string" && (id.startsWith("/") || id.endsWith(".html"))) {
+    window.location.href = id;
+    return;
+  }
+
   document.querySelectorAll(".page").forEach(function (p) {
     p.classList.remove("active");
   });
@@ -39,7 +44,7 @@ function goHome() {
   showPage("home");
 }
 function goLogin() {
-  showPage("login");
+  showPage("/protected/protected.html");
 }
 function goContact() {
   showPage("home");
