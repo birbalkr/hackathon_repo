@@ -1,240 +1,223 @@
-gsap.registerPlugin(ScrollTrigger);
+// ── District pills (pure JS — no template literals in HTML) ──
+(function () {
+  var districts = [
+    "Patna",
+    "Vaishali",
+    "Muzaffarpur",
+    "Samastipur",
+    "Darbhanga",
+    "Begusarai",
+    "Gaya",
+    "Nalanda",
+    "Bhagalpur",
+    "Purnia",
+  ];
+  var container = document.getElementById("district-pills");
+  districts.forEach(function (d) {
+    var s = document.createElement("span");
+    s.className = "district-pill";
+    s.textContent = d;
+    container.appendChild(s);
+  });
+})();
 
-/* ── FLOATING BG ICONS ── */
-const floatIcons = ["🌾", "🌿", "🍃", "🌱", "🌽", "🥦", "🫛", "🍅", "🌻", "🫚"];
-const fa = document.getElementById("hfloat");
-for (let i = 0; i < 16; i++) {
-  const d = document.createElement("div");
-  d.className = "hf";
-  d.textContent = floatIcons[i % floatIcons.length];
-  d.style.cssText = `left:${Math.random() * 100}%;top:${Math.random() * 100}%`;
-  fa.appendChild(d);
-  gsap.to(d, {
-    y: (Math.random() - 0.5) * 70,
-    x: (Math.random() - 0.5) * 35,
-    rotation: (Math.random() - 0.5) * 50,
-    duration: 3 + Math.random() * 4,
-    repeat: -1,
-    yoyo: true,
-    ease: "sine.inOut",
-    delay: Math.random() * 1,
+// ── Page navigation ──────────────────────────
+function showPage(id) {
+  document.querySelectorAll(".page").forEach(function (p) {
+    p.classList.remove("active");
+  });
+  var page = document.getElementById("page-" + id);
+  if (page) page.classList.add("active");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  // nav highlights
+  ["home", "contact"].forEach(function (k) {
+    var el = document.getElementById("nl-" + k);
+    if (el) el.classList.toggle("active", k === id);
   });
 }
-
-/* ── LOGO PULSE ── */
-gsap.to("#logo-svg", {
-  rotation: 8,
-  duration: 1.8,
-  repeat: -1,
-  yoyo: true,
-  ease: "sine.inOut",
-  transformOrigin: "center",
-});
-gsap.to("#stem", {
-  scaleY: 1.15,
-  duration: 1.2,
-  repeat: -1,
-  yoyo: true,
-  ease: "sine.inOut",
-  transformOrigin: "bottom center",
-});
-
-/* ── NAVBAR ENTRANCE ── */
-gsap.fromTo(
-  "#nav",
-  { y: -70, opacity: 0 },
-  { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" },
-);
-
-/* ── NAV LINKS: Home & Contact stagger in ── */
-gsap.fromTo(
-  ["#nl-home", "#nl-contact"],
-  { opacity: 0, y: -20 },
-  {
-    opacity: 1,
-    y: 0,
-    stagger: 0.15,
-    duration: 0.5,
-    delay: 0.4,
-    ease: "back.out(1.7)",
-  },
-);
-
-/* ── LOGIN BUTTON bounce in ── */
-gsap.fromTo(
-  "#nav-login",
-  { opacity: 0, scale: 0.6, rotation: -10 },
-  {
-    opacity: 1,
-    scale: 1,
-    rotation: 0,
-    duration: 0.6,
-    delay: 0.7,
-    ease: "back.out(2)",
-  },
-);
-
-/* ── LOGIN BUTTON icon wiggle on hover ── */
-const loginBtn = document.getElementById("nav-login");
-loginBtn.addEventListener("mouseenter", () =>
-  gsap.to(loginBtn.querySelector("svg"), {
-    rotation: 15,
-    scale: 1.3,
-    duration: 0.25,
-    ease: "power2.out",
-  }),
-);
-loginBtn.addEventListener("mouseleave", () =>
-  gsap.to(loginBtn.querySelector("svg"), {
-    rotation: 0,
-    scale: 1,
-    duration: 0.25,
-    ease: "power2.out",
-  }),
-);
-
-/* ── HERO ENTRANCE ── */
-const heroTl = gsap.timeline({ delay: 0.5 });
-heroTl
-  .fromTo(
-    "#hbadge",
-    { opacity: 0, y: 24 },
-    { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
-  )
-  .fromTo(
-    "#htitle",
-    { opacity: 0, y: 36 },
-    { opacity: 1, y: 0, duration: 0.65, ease: "power2.out" },
-    "<.15",
-  )
-  .fromTo(
-    "#hsub",
-    { opacity: 0, y: 20 },
-    { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
-    "<.2",
-  )
-  .fromTo(
-    "#hbtn",
-    { opacity: 0, scale: 0.8 },
-    { opacity: 1, scale: 1, duration: 0.45, ease: "back.out(2)" },
-    "<.15",
-  )
-  .fromTo(
-    ["#st1", "#st2", "#st3"],
-    { opacity: 0, y: 20 },
-    { opacity: 1, y: 0, stagger: 0.15, duration: 0.4, ease: "power2.out" },
-    "<.2",
-  );
-
-/* ── COUNTERS ── */
-function countUp(id, to, suffix = "") {
-  const el = document.getElementById(id),
-    obj = { v: 0 };
-  gsap.to(obj, {
-    v: to,
-    duration: 2,
-    ease: "power2.out",
-    delay: 1.2,
-    onUpdate: () =>
-      (el.textContent = Math.round(obj.v).toLocaleString() + suffix),
-  });
+function goHome() {
+  showPage("home");
 }
-countUp("c1", 12400, "+");
-countUp("c2", 84000, "+");
-countUp("c3", 320, "+");
+function goLogin() {
+  showPage("login");
+}
+function goContact() {
+  showPage("home");
+  setTimeout(function () {
+    jumpTo("contact");
+  }, 150);
+}
+function jumpTo(id) {
+  var el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: "smooth" });
+}
 
-/* ── HOW IT WORKS: scroll reveal + icon bounce ── */
-gsap.fromTo(
-  "#hw-t",
-  { opacity: 0, y: 28 },
-  {
-    opacity: 1,
-    y: 0,
-    duration: 0.6,
-    scrollTrigger: { trigger: "#hw-t", start: "top 85%" },
-  },
-);
+// ── Navbar scroll ─────────────────────────────
+window.addEventListener("scroll", function () {
+  document
+    .getElementById("navbar")
+    .classList.toggle("scrolled", window.scrollY > 10);
+});
+document.getElementById("navbar").classList.add("scrolled");
 
-const hwCards = document.querySelectorAll("#hw-cards .card");
-hwCards.forEach((card, i) => {
-  gsap.fromTo(
-    card,
-    { opacity: 0, y: 50, scale: 0.9 },
-    {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      duration: 0.65,
-      ease: "back.out(1.4)",
-      delay: i * 0.12,
-      scrollTrigger: { trigger: "#hw-cards", start: "top 80%" },
-    },
-  );
-  const iw = card.querySelector(".icon-wrap");
-  gsap.to(iw, {
-    y: -6,
-    duration: 1.6 + i * 0.2,
-    repeat: -1,
-    yoyo: true,
-    ease: "sine.inOut",
-    delay: i * 0.3,
-  });
-  card.addEventListener("mouseenter", () => {
-    gsap.to(iw, {
-      rotation: 15,
-      scale: 1.15,
-      duration: 0.3,
-      ease: "back.out(2)",
-    });
-    gsap.to(iw.querySelector("svg"), {
-      filter: "drop-shadow(0 4px 10px rgba(76,175,80,.5))",
-      duration: 0.3,
-    });
-  });
-  card.addEventListener("mouseleave", () => {
-    gsap.to(iw, { rotation: 0, scale: 1, duration: 0.3, ease: "power2.out" });
-    gsap.to(iw.querySelector("svg"), { filter: "none", duration: 0.3 });
-  });
+// ── Mobile menu ───────────────────────────────
+function toggleMenu() {
+  document.getElementById("mobile-menu").classList.toggle("open");
+}
+document.addEventListener("click", function (e) {
+  var menu = document.getElementById("mobile-menu");
+  var ham = document.getElementById("hamburger");
+  if (
+    menu.classList.contains("open") &&
+    !menu.contains(e.target) &&
+    !ham.contains(e.target)
+  ) {
+    menu.classList.remove("open");
+  }
 });
 
-/* ── FEATURES: scroll reveal + icon spin on hover ── */
-gsap.fromTo(
-  "#feat-t",
-  { opacity: 0, y: 28 },
-  {
-    opacity: 1,
-    y: 0,
-    duration: 0.6,
-    scrollTrigger: { trigger: "#feat-t", start: "top 85%" },
-  },
-);
+// ── Hero counter animation ────────────────────
+var counters = [
+  { id: "cnt1", target: 18400, suffix: "+" },
+  { id: "cnt2", target: 12485, suffix: "" },
+  { id: "cnt3", target: 48200, suffix: "T" },
+  { id: "cnt4", target: 38, suffix: "+" },
+];
+function animCount(el, target, suffix, dur) {
+  var start = null;
+  function step(ts) {
+    if (!start) start = ts;
+    var p = Math.min((ts - start) / dur, 1);
+    var ease = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.floor(ease * target).toLocaleString("en-IN") + suffix;
+    if (p < 1) requestAnimationFrame(step);
+    else el.textContent = target.toLocaleString("en-IN") + suffix;
+  }
+  requestAnimationFrame(step);
+}
+setTimeout(function () {
+  counters.forEach(function (c) {
+    var el = document.getElementById(c.id);
+    if (el) animCount(el, c.target, c.suffix, 2000);
+  });
+}, 500);
 
-const fCards = document.querySelectorAll("#feat-cards .feat-card");
-fCards.forEach((card, i) => {
-  gsap.fromTo(
-    card,
-    { opacity: 0, x: -36 },
-    {
-      opacity: 1,
-      x: 0,
-      duration: 0.55,
-      ease: "power3.out",
-      delay: i * 0.13,
-      scrollTrigger: { trigger: "#feat-cards", start: "top 82%" },
-    },
-  );
-  const fi = card.querySelector(".feat-icon");
-  card.addEventListener("mouseenter", () =>
-    gsap.to(fi, {
-      rotation: 360,
-      scale: 1.18,
-      duration: 0.5,
-      ease: "power2.inOut",
-    }),
-  );
-  card.addEventListener("mouseleave", () =>
-    gsap.to(fi, { rotation: 0, scale: 1, duration: 0.4, ease: "power2.out" }),
-  );
+// ── Scroll reveal ─────────────────────────────
+var revObs = new IntersectionObserver(
+  function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) e.target.classList.add("visible");
+    });
+  },
+  { threshold: 0.1 },
+);
+document.querySelectorAll(".reveal").forEach(function (el) {
+  revObs.observe(el);
 });
 
+// ── 6-second popup ────────────────────────────
+var popupShown = false;
+var popupInt = null;
+var remaining = 30;
 
+function showPopup() {
+  if (popupShown) return;
+  popupShown = true;
+  document.getElementById("popup-overlay").classList.add("show");
+  var timerEl = document.getElementById("popup-timer");
+  popupInt = setInterval(function () {
+    remaining--;
+    timerEl.textContent = "Closes automatically in " + remaining + "s";
+    if (remaining <= 0) closePopup();
+  }, 1000);
+}
+function closePopup() {
+  document.getElementById("popup-overlay").classList.remove("show");
+  clearInterval(popupInt);
+}
+// Trigger at 6 seconds
+setTimeout(showPopup, 6000);
+// Exit-intent
+document.addEventListener("mouseleave", function (e) {
+  if (e.clientY < 5 && !popupShown) showPopup();
+});
+// Click overlay to close
+document
+  .getElementById("popup-overlay")
+  .addEventListener("click", function (e) {
+    if (e.target === this) closePopup();
+  });
+
+// ── Auth tab switch ───────────────────────────
+function switchTab(tab) {
+  var si = tab === "signin";
+  document.getElementById("tab-si").classList.toggle("active", si);
+  document.getElementById("tab-su").classList.toggle("active", !si);
+  document.getElementById("form-signin").style.display = si ? "block" : "none";
+  document.getElementById("form-signup").style.display = si ? "none" : "block";
+  document.getElementById("auth-title").textContent = si
+    ? "Welcome back"
+    : "Join KisanTrack";
+  document.getElementById("auth-sub").textContent = si
+    ? "Sign in to your KisanTrack account"
+    : "Create your free account in 30 seconds";
+}
+
+// ── Sign In ───────────────────────────────────
+function handleSignIn() {
+  var email = document.getElementById("si-email").value.trim();
+  var pass = document.getElementById("si-pass").value;
+  if (!email) return showToast("Please enter your email or phone.", "red");
+  if (!pass) return showToast("Please enter your password.", "red");
+  if (pass.length < 6)
+    return showToast("Password must be at least 6 characters.", "red");
+  showToast("Signing you in... Welcome back!", "green");
+  setTimeout(goHome, 1600);
+}
+
+// ── Sign Up ───────────────────────────────────
+function handleSignUp() {
+  var first = document.getElementById("su-first").value.trim();
+  var email = document.getElementById("su-email").value.trim();
+  var pass = document.getElementById("su-pass").value;
+  if (!first) return showToast("Please enter your first name.", "red");
+  if (!email) return showToast("Please enter your email.", "red");
+  if (pass.length < 8)
+    return showToast("Password must be at least 8 characters.", "red");
+  showToast("Account created! Welcome, " + first + "!", "green");
+  setTimeout(goHome, 1800);
+}
+
+// ── Password visibility ───────────────────────
+function togglePass(id, btn) {
+  var inp = document.getElementById(id);
+  if (!inp) return;
+  inp.type = inp.type === "password" ? "text" : "password";
+  btn.textContent = inp.type === "password" ? "\uD83D\uDC41" : "\uD83D\uDE48";
+}
+
+// ── Contact form ──────────────────────────────
+function submitContact() {
+  var name = document.getElementById("c-name").value.trim();
+  var email = document.getElementById("c-email").value.trim();
+  var msg = document.getElementById("c-msg").value.trim();
+  if (!name) return showToast("Please enter your name.", "red");
+  if (!email) return showToast("Please enter your email or phone.", "red");
+  if (!msg) return showToast("Please write a message.", "red");
+  showToast("Message sent! We'll reply within 24 hours.", "green");
+  document.getElementById("c-name").value = "";
+  document.getElementById("c-email").value = "";
+  document.getElementById("c-msg").value = "";
+}
+
+// ── Toast ─────────────────────────────────────
+function showToast(msg, type) {
+  var t = document.getElementById("toast");
+  t.style.background = type === "red" ? "#C0392B" : "#0D4A1E";
+  document.getElementById("toast-msg").textContent = msg;
+  t.classList.add("show");
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(function () {
+    t.classList.remove("show");
+  }, 3400);
+}

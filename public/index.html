@@ -2,234 +2,667 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KisanTrack</title>
-  <link rel="stylesheet" href="stylesheets/index.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KisanTrack — Farm to Market, Tracked.</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+<link rel="stylesheet" href="stylesheets/index.css">
+
 </head>
 
 <body>
 
-  <nav id="nav">
-    <div class="navLogo" id="nav-logo">
-      <img src="./images/kisan.jpeg" alt="kisantrack logo" class="weblogo">
+  <!-- ════════ NAVBAR ════════ -->
+  <nav id="navbar">
+    <div class="nav-logo" onclick="goHome()">
+      <div class="nav-logo-icon">
+        <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
+          <path d="M11 2C11 2 7 7 7 12a4 4 0 008 0c0-5-4-10-4-10z" fill="#fff" opacity=".9" />
+          <path d="M11 12v8M8 15l3-3 3 3" stroke="#fff" stroke-width="1.3" stroke-linecap="round"
+            stroke-linejoin="round" />
+          <path d="M5 10c-1 0-3 1.5-3 4M17 10c1 0 3 1.5 3 4" stroke="#fff" stroke-width="1.1" stroke-linecap="round"
+            opacity=".6" />
+        </svg>
+      </div>
+      <div>
+        <div class="nav-logo-text">KisanTrack</div>
+        <div class="nav-logo-sub">Since 2026</div>
+      </div>
     </div>
 
-    <ul id="nav-links">
-      <li  id="nl-home" class="nav-active">
-        <a href="index.html">Home</a>
-        <span class="nav-underline"></span></li>
-      <li id="nl-contact"><a href="contact.html">Contact</a><span class="nav-underline"></span></li>
-      <li id="nl-about"><a href="about.html">About</a><span class="nav-underline"></span></li>
-    </ul>
+    <div class="nav-links">
+      <button class="nav-link active" id="nl-home" onclick="goHome()">Home</button>
+      <button class="nav-link" id="nl-contact" onclick="goContact()">Contact</button>
+      <button class="nav-btn" onclick="goLogin()">Login / Sign Up</button>
+    </div>
 
-    
-    <button class="btn-login" id="nav-login">
-      <a href="/protected/protected.html">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-        <circle cx="12" cy="8" r="4" />
-        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-      </svg>
-      Login</a>
+    <button id="hamburger" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
     </button>
   </nav>
 
-  <div class="hero">
-    <div class="hero-floats" id="hfloat"></div>
-    <div id="hbadge" class="hero-badge">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="#FFD54F">
-        <path d="M12 2l2.5 5 5.5.8-4 3.9.9 5.5L12 14.8l-4.9 2.4.9-5.5L4 7.8 9.5 7z" />
-      </svg>
-      Farm-to-Market Transparency
-    </div>
-    <h1 id="htitle">Track Your Crop Journey</h1>
-    <p id="hsub">Seamless transparency from field to fork — powered by real-time data.</p>
-    <button class="hero-btn" id="hbtn" onclick="alert('Welcome to KisanTrack 🌱')">Get Started →</button>
-    <div class="stats">
-      <div class="stat" id="st1">
-        <div class="stat-num" id="c1">0</div>
-        <div class="stat-lbl">Farmers onboard</div>
-      </div>
-      <div class="stat" id="st2">
-        <div class="stat-num" id="c2">0</div>
-        <div class="stat-lbl">Tons tracked</div>
-      </div>
-      <div class="stat" id="st3">
-        <div class="stat-num" id="c3">0</div>
-        <div class="stat-lbl">Markets reached</div>
-      </div>
-    </div>
-    <div class="qr-section">
-      <h3>Scan to Track Crop 📦</h3>
-      <div id="qrcode"></div>
-    </div>
+  <div id="mobile-menu">
+    <button class="mob-btn" onclick="goHome();toggleMenu()">🏠 Home</button>
+    <button class="mob-btn" onclick="goContact();toggleMenu()">📞 Contact</button>
+    <button class="mob-btn" onclick="goLogin();toggleMenu()">🔐 Login / Sign Up</button>
   </div>
 
 
-  <section>
-    <h2 class="sec-title" id="hw-t">How It Works</h2>
-    <p class="sec-sub">Seamless tracking from start to finish</p>
-    <div class="cards" id="hw-cards">
+  <!-- ════════════════════════════════════
+     PAGE: HOME
+════════════════════════════════════ -->
+  <div id="page-home" class="page active">
 
-      <div class="card" id="c-farmer">
-        <div class="icon-wrap" style="background:#e8f5e9" id="iw-farmer">
-          <svg width="40" height="40" viewBox="0 0 48 48" fill="none">
-            <circle cx="24" cy="16" r="8" fill="#4CAF50" />
-            <ellipse cx="24" cy="36" rx="14" ry="8" fill="#81C784" />
-            <rect x="16" y="6" width="16" height="4" rx="2" fill="#FFD54F" />
-            <rect x="12" y="4" width="24" height="4" rx="2" fill="#2E7D32" />
-            <path d="M30 20 Q34 14 38 16" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" fill="none" />
-            <circle cx="38" cy="14" r="3" fill="#66bb6a" />
-          </svg>
+    <!-- HERO -->
+    <section id="hero">
+      <div class="ring" style="width:900px;height:900px;top:-300px;right:-300px;"></div>
+      <div class="ring" style="width:500px;height:500px;top:-100px;right:-100px;"></div>
+      <div class="ring" style="width:340px;height:340px;bottom:60px;left:-130px;"></div>
+
+      <div class="hero-content">
+        <div class="hero-tag">
+          <div class="blink"></div>Live Agricultural Tracking Platform
         </div>
-        <h4>Farmer</h4>
-        <p>Uploads crop data securely</p>
+        <h1 class="hero-h1">From <em>Farm</em> to<br />Market, Tracked.</h1>
+        <p class="hero-sub">KisanTrack gives every crop a digital identity — real-time visibility across farmers,
+          transporters, warehouses, and sellers across Bihar and beyond.</p>
+        <div class="hero-cta">
+          <button class="btn-w" onclick="goLogin()">Start Tracking Free</button>
+          <button class="btn-o" onclick="jumpTo('how')">See How It Works ↓</button>
+        </div>
       </div>
 
-      <div class="arrow-sep"><svg viewBox="0 0 30 16">
-          <path d="M0 8h24M18 2l6 6-6 6" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" fill="none" />
-        </svg></div>
+      <div class="scroll-arr">↓</div>
 
-      <div class="card" id="c-truck">
-        <div class="icon-wrap" style="background:#e3f2fd" id="iw-truck">
-          <svg width="42" height="36" viewBox="0 0 56 40" fill="none">
-            <rect x="2" y="8" width="32" height="22" rx="4" fill="#1565c0" />
-            <path d="M34 14h10l6 10v6H34V14z" fill="#1976d2" />
-            <rect x="4" y="10" width="28" height="12" rx="2" fill="#42a5f5" />
-            <circle cx="12" cy="32" r="5" fill="#37474f" />
-            <circle cx="12" cy="32" r="2.5" fill="#90a4ae" />
-            <circle cx="42" cy="32" r="5" fill="#37474f" />
-            <circle cx="42" cy="32" r="2.5" fill="#90a4ae" />
-            <rect x="36" y="16" width="7" height="7" rx="1" fill="#bbdefb" />
-            <path d="M50 32h4" stroke="#FFD54F" stroke-width="2.5" stroke-linecap="round" />
-          </svg>
+      <div class="hero-stats">
+        <div class="hstat">
+          <div class="n" id="cnt1">0</div>
+          <div class="l">Farmers Registered</div>
         </div>
-        <h4>Transport</h4>
-        <p>Live GPS tracking</p>
+        <div class="hstat">
+          <div class="n" id="cnt2">0</div>
+          <div class="l">Batches Tracked</div>
+        </div>
+        <div class="hstat">
+          <div class="n" id="cnt3">0</div>
+          <div class="l">Tonnes Moved</div>
+        </div>
+        <div class="hstat">
+          <div class="n" id="cnt4">0</div>
+          <div class="l">Districts Covered</div>
+        </div>
       </div>
+    </section>
 
-      <div class="arrow-sep"><svg viewBox="0 0 30 16">
-          <path d="M0 8h24M18 2l6 6-6 6" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" fill="none" />
-        </svg></div>
-
-      <div class="card" id="c-store">
-        <div class="icon-wrap" style="background:#fff8e1" id="iw-store">
-          <svg width="40" height="40" viewBox="0 0 48 48" fill="none">
-            <path d="M6 20l18-14 18 14" fill="#ffd54f" />
-            <rect x="8" y="20" width="32" height="22" rx="2" fill="#f9a825" />
-            <rect x="18" y="28" width="12" height="14" rx="2" fill="#e65100" />
-            <rect x="10" y="24" width="10" height="10" rx="1" fill="#fff8e1" />
-            <rect x="28" y="24" width="10" height="10" rx="1" fill="#fff8e1" />
-            <circle cx="38" cy="14" r="5" fill="#4CAF50" />
-            <path d="M36 14l1.5 1.5L40 12" stroke="#fff" stroke-width="1.8" stroke-linecap="round"
-              stroke-linejoin="round" />
-          </svg>
+    <!-- HOW IT WORKS -->
+    <div id="how" style="background:var(--cream);">
+      <div class="sec">
+        <div class="reveal">
+          <div class="stag">How It Works</div>
+          <h2 class="sh2">Seven steps.<br />Complete traceability.</h2>
+          <p class="ssub">Every crop batch gets a unique ID and travels through a verified, timestamped digital journey
+            visible to all stakeholders.</p>
         </div>
-        <h4>Storage</h4>
-        <p>Quality monitoring</p>
-      </div>
-
-      <div class="arrow-sep"><svg viewBox="0 0 30 16">
-          <path d="M0 8h24M18 2l6 6-6 6" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" fill="none" />
-        </svg></div>
-
-      <div class="card" id="c-market">
-        <div class="icon-wrap" style="background:#fce4ec" id="iw-market">
-          <svg width="40" height="40" viewBox="0 0 48 48" fill="none">
-            <rect x="6" y="18" width="36" height="24" rx="3" fill="#c62828" />
-            <path d="M4 18h40l-4-8H8L4 18z" fill="#e53935" />
-            <rect x="14" y="24" width="8" height="8" rx="1" fill="#fff" />
-            <rect x="26" y="24" width="8" height="10" rx="1" fill="#fff9c4" />
-            <circle cx="18" cy="11" r="5" fill="none" stroke="#fff" stroke-width="2" />
-            <circle cx="30" cy="11" r="5" fill="none" stroke="#fff" stroke-width="2" />
-            <path d="M34 8 Q36 4 38 6" stroke="#FFD54F" stroke-width="2" fill="none" stroke-linecap="round" />
-          </svg>
+        <div class="steps reveal">
+          <div class="step">
+            <div class="step-n">Step 01</div>
+            <div class="step-ico">🌾</div>
+            <div class="step-t">Farmer Harvest</div>
+            <div class="step-d">Farmer registers the batch with crop type, weight, and farm location. A unique QR batch
+              ID is generated instantly on any mobile device.</div>
+            <div class="step-arr">→</div>
+          </div>
+          <div class="step">
+            <div class="step-n">Step 02</div>
+            <div class="step-ico">🔬</div>
+            <div class="step-t">Quality Check</div>
+            <div class="step-d">Certified agents record moisture, grade (A/B/C), and pesticide clearance before the crop
+              moves forward in the chain.</div>
+            <div class="step-arr">→</div>
+          </div>
+          <div class="step">
+            <div class="step-n">Step 03</div>
+            <div class="step-ico">🏭</div>
+            <div class="step-t">Processing Hub</div>
+            <div class="step-d">Cleaned, sorted, and packed at a primary processing facility. Weight and condition are
+              re-verified and digitally updated.</div>
+            <div class="step-arr">→</div>
+          </div>
+          <div class="step">
+            <div class="step-n">Step 04</div>
+            <div class="step-ico">🚛</div>
+            <div class="step-t">Live Transport</div>
+            <div class="step-d">Vehicle, temperature, and ETA are tracked live. Automatic alerts fire if temperature
+              thresholds are crossed during transit.</div>
+          </div>
         </div>
-        <h4>Market</h4>
-        <p>Instant product info</p>
-      </div>
-    </div>
-  </section>
-
-  <section style="background:#f0f7ee">
-    <h2 class="sec-title" id="feat-t">Key Features</h2>
-    <p class="sec-sub">Enhancing supply chain transparency</p>
-    <div class="feat-grid" id="feat-cards">
-      <div class="feat-card">
-        <div class="feat-icon" style="background:#e8f5e9" id="fi1">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-            <path d="M12 2l2.5 5 5.5.8-4 3.9.9 5.5L12 14.8l-4.9 2.4.9-5.5L4 7.8 9.5 7z" fill="#4CAF50" />
-          </svg>
+        <div class="steps reveal" style="margin-top:1.5rem;">
+          <div class="step">
+            <div class="step-n">Step 05</div>
+            <div class="step-ico">🏪</div>
+            <div class="step-t">Warehouse Storage</div>
+            <div class="step-d">Cold chain facilities log daily temperature, intake weight, and planned dispatch date —
+              all linked to the batch ID.</div>
+            <div class="step-arr">→</div>
+          </div>
+          <div class="step">
+            <div class="step-n">Step 06</div>
+            <div class="step-ico">🤝</div>
+            <div class="step-t">Intermediary Sale</div>
+            <div class="step-d">Trade agents log the agreed price, making margins transparent to farmers and protecting
+              them from exploitation.</div>
+            <div class="step-arr">→</div>
+          </div>
+          <div class="step">
+            <div class="step-n">Step 07</div>
+            <div class="step-ico">🛒</div>
+            <div class="step-t">Final Market Sale</div>
+            <div class="step-d">The buyer receives a verified digital certificate showing the crop's full journey —
+              origin, quality, and every hand it passed through.</div>
+          </div>
+          <div class="step" style="background:var(--gd);border-color:var(--gd);">
+            <div class="step-n" style="color:var(--gp);">Result</div>
+            <div class="step-ico">📊</div>
+            <div class="step-t" style="color:#fff;">Full Transparency</div>
+            <div class="step-d" style="color:rgba(255,255,255,.7);">Every rupee, every kilometre, every temperature
+              reading — on one live dashboard for every stakeholder.</div>
+          </div>
         </div>
-        <h4>Tamper-proof data</h4>
-        <p>Blockchain-secured crop records you can trust end to end.</p>
-        <span class="tag" style="background:#e8f5e9;color:#2E7D32">Farmer</span>
-      </div>
-      <div class="feat-card" style="border-top-color:#1565c0">
-        <div class="feat-icon" style="background:#e3f2fd" id="fi2">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="9" stroke="#1565c0" stroke-width="2" />
-            <path d="M12 7v5l3 3" stroke="#1565c0" stroke-width="2" stroke-linecap="round" />
-          </svg>
-        </div>
-        <h4>Live shipment updates</h4>
-        <p>Real-time GPS location for every delivery in motion.</p>
-        <span class="tag" style="background:#e3f2fd;color:#1565c0">Transport</span>
-      </div>
-      <div class="feat-card" style="border-top-color:#f9a825">
-        <div class="feat-icon" style="background:#fff8e1" id="fi3">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-            <rect x="3" y="11" width="18" height="11" rx="2" fill="#f9a825" />
-            <path d="M3 11l9-7 9 7" fill="#ffd54f" />
-            <rect x="9" y="15" width="6" height="7" rx="1" fill="#fff" />
-          </svg>
-        </div>
-        <h4>Storage checkpoints</h4>
-        <p>Monitor temperature and quality at every stage.</p>
-        <span class="tag" style="background:#fff8e1;color:#e65100">Storage</span>
-      </div>
-      <div class="feat-card" style="border-top-color:#c62828">
-        <div class="feat-icon" style="background:#fce4ec" id="fi4">
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-            <rect x="3" y="9" width="18" height="13" rx="2" fill="#c62828" />
-            <path d="M3 9h18L19 5H5L3 9z" fill="#e53935" />
-            <rect x="7" y="13" width="4" height="4" rx="1" fill="#fff" />
-            <rect x="13" y="13" width="4" height="5" rx="1" fill="#fff9c4" />
-          </svg>
-        </div>
-        <h4>Instant product info</h4>
-        <p>Scan QR at market to view full crop journey history.</p>
-        <span class="tag" style="background:#fce4ec;color:#c62828">Market</span>
       </div>
     </div>
-  </section>
 
-  <footer>
-    <p>© 2024 KisanTrack &nbsp;|&nbsp; <a href="mailto:info@kisantrack.com">info@kisantrack.com</a></p>
-  </footer>
+    <!-- FEATURES -->
+    <div id="features" style="background:#fff;">
+      <div class="sec">
+        <div class="reveal">
+          <div class="stag">Platform Features</div>
+          <h2 class="sh2">Everything your supply<br />chain needs.</h2>
+          <p class="ssub">Built for farmers, transporters, warehouse managers, and buyers — one platform, every
+            stakeholder connected in real time.</p>
+        </div>
+        <div class="feat-grid reveal">
+          <div class="feat" style="--ac:#2E9E50;">
+            <div class="feat-ico" style="background:#E8F7EC;">🗺️</div>
+            <div class="feat-t">End-to-End Traceability</div>
+            <div class="feat-d">Every batch has a timestamped journey from farm gate to final sale. Scan any QR code to
+              see the full verified history instantly.</div>
+          </div>
+          <div class="feat" style="--ac:#E8A020;">
+            <div class="feat-ico" style="background:#FEF3DC;">🌡️</div>
+            <div class="feat-t">Temperature Alerts</div>
+            <div class="feat-d">Automated alerts fire when storage or transit temperature crosses safe thresholds —
+              preventing spoilage before it happens.</div>
+          </div>
+          <div class="feat" style="--ac:#1A6B9E;">
+            <div class="feat-ico" style="background:#EBF5FB;">📊</div>
+            <div class="feat-t">Price Transparency</div>
+            <div class="feat-d">See the full price journey — farm gate to consumer — so farmers know their fair share
+              and buyers can trust the supply chain.</div>
+          </div>
+          <div class="feat" style="--ac:#8E44AD;">
+            <div class="feat-ico" style="background:#F5EEF8;">🔬</div>
+            <div class="feat-t">Quality Management</div>
+            <div class="feat-d">Digital quality certificates, grade records, and pesticide test results — all linked
+              permanently to the batch and farmer ID.</div>
+          </div>
+          <div class="feat" style="--ac:#C0392B;">
+            <div class="feat-ico" style="background:#FDECEA;">🏪</div>
+            <div class="feat-t">Warehouse Integration</div>
+            <div class="feat-d">Cold chain facilities log intake, daily temperature checks, and dispatch — inventory is
+              always real-time and fully auditable.</div>
+          </div>
+          <div class="feat" style="--ac:#2E9E50;">
+            <div class="feat-ico" style="background:#E8F7EC;">📱</div>
+            <div class="feat-t">QR Scan and Update</div>
+            <div class="feat-d">Field agents scan batch QR codes on any mobile device to update stages, add photos, and
+              log handoff signatures — no app needed.</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <!-- SUPPLY CHAIN NODES -->
+    <div id="chain">
+      <div class="chain-in">
+        <div class="reveal" style="text-align:center;">
+          <div class="stag" style="background:rgba(255,255,255,.12);color:var(--gp);">The Chain</div>
+          <h2 class="sh2" style="color:#fff;">Every stakeholder,<br />one platform.</h2>
+          <p style="color:rgba(255,255,255,.55);font-size:1rem;line-height:1.7;max-width:480px;margin:0 auto;">
+            Farmers, transporters, warehouses, intermediaries, and sellers — all connected with full visibility at every
+            node.
+          </p>
+        </div>
+        <div class="nodes reveal">
+          <div class="node">
+            <div class="ndot" style="background:rgba(46,158,80,.3);">🌾</div>
+            <div class="nt">Farmer</div>
+            <div class="ns">Registers harvest</div>
+          </div>
+          <div class="node">
+            <div class="ndot" style="background:rgba(26,107,158,.3);">🚛</div>
+            <div class="nt">Transporter</div>
+            <div class="ns">Live GPS + temp</div>
+          </div>
+          <div class="node">
+            <div class="ndot" style="background:rgba(232,160,32,.3);">🏭</div>
+            <div class="nt">Warehouse</div>
+            <div class="ns">Storage and grading</div>
+          </div>
+          <div class="node">
+            <div class="ndot" style="background:rgba(142,68,173,.3);">🤝</div>
+            <div class="nt">Intermediary</div>
+            <div class="ns">Transparent pricing</div>
+          </div>
+          <div class="node">
+            <div class="ndot" style="background:rgba(192,57,43,.3);">🛒</div>
+            <div class="nt">Seller / Buyer</div>
+            <div class="ns">Verified crop source</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS BAND -->
+    <div class="stats-band">
+      <div class="stats-inner">
+        <div>
+          <div class="sb-n">18,400+</div>
+          <div class="sb-l">Registered Farmers</div>
+        </div>
+        <div>
+          <div class="sb-n">96.1%</div>
+          <div class="sb-l">Quality Pass Rate</div>
+        </div>
+        <div>
+          <div class="sb-n">28%</div>
+          <div class="sb-l">Wastage Reduced</div>
+        </div>
+        <div>
+          <div class="sb-n">38</div>
+          <div class="sb-l">Districts Covered</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TESTIMONIALS -->
+    <div id="testimonials" style="background:var(--cream);">
+      <div class="sec">
+        <div class="reveal">
+          <div class="stag">Farmer Stories</div>
+          <h2 class="sh2">Trusted by 18,000+ farmers<br />across Bihar.</h2>
+        </div>
+        <div class="tgrid reveal">
+          <div class="tc">
+            <div class="stars">★★★★★</div>
+            <div class="ttext">Before KisanTrack, I had no idea where my rice went after handing it to the trader. Now I
+              can see every step on my phone — even the price it sold for at Patna market.</div>
+            <div class="tauth">
+              <div class="tav">R</div>
+              <div>
+                <div class="tnm">Raju Prasad</div>
+                <div class="trl">Rice Farmer · Bidupur, Vaishali</div>
+              </div>
+            </div>
+          </div>
+          <div class="tc">
+            <div class="stars">★★★★★</div>
+            <div class="ttext">The temperature alert saved my entire maize shipment. I got a notification that the cold
+              chain was failing — I called the warehouse and they fixed it within 2 hours.</div>
+            <div class="tauth">
+              <div class="tav">M</div>
+              <div>
+                <div class="tnm">Mohan Yadav</div>
+                <div class="trl">Maize Farmer · Lalganj, Vaishali</div>
+              </div>
+            </div>
+          </div>
+          <div class="tc">
+            <div class="stars">★★★★★</div>
+            <div class="ttext">As a warehouse manager, KisanTrack cut our paperwork by 80%. Every batch in and out is
+              logged digitally, and buyers can verify quality certificates themselves.</div>
+            <div class="tauth">
+              <div class="tav">A</div>
+              <div>
+                <div class="tnm">Anita Devi</div>
+                <div class="trl">Warehouse Manager · Samastipur</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRICING -->
+    <div id="pricing" style="background:#fff;">
+      <div class="sec">
+        <div class="reveal" style="text-align:center;">
+          <div class="stag">Pricing</div>
+          <h2 class="sh2">Simple, transparent plans.</h2>
+          <p class="ssub" style="margin:0 auto;">Start free, scale as your supply chain grows.</p>
+        </div>
+        <div class="pgrid reveal">
+          <div class="pc">
+            <div class="pname">Starter</div>
+            <div class="pamount">Free</div>
+            <div class="pperiod">Forever, no credit card</div>
+            <ul class="pfeats">
+              <li>Up to 50 batch records</li>
+              <li>1 farmer account</li>
+              <li>Basic quality logging</li>
+              <li>QR batch generation</li>
+              <li>Email support</li>
+            </ul>
+            <button class="pbtn" onclick="goLogin()">Get Started Free</button>
+          </div>
+          <div class="pc feat-p">
+            <div class="pbadge">Most Popular</div>
+            <div class="pname">Professional</div>
+            <div class="pamount">&#8377;999</div>
+            <div class="pperiod">per month</div>
+            <ul class="pfeats">
+              <li>Unlimited batch records</li>
+              <li>Up to 500 farmer accounts</li>
+              <li>Live temperature alerts</li>
+              <li>Price transparency dashboard</li>
+              <li>Firebase real-time sync</li>
+              <li>Analytics and export</li>
+              <li>Priority support</li>
+            </ul>
+            <button class="pbtn" onclick="goLogin()">Start Free Trial</button>
+          </div>
+          <div class="pc">
+            <div class="pname">Enterprise</div>
+            <div class="pamount">Custom</div>
+            <div class="pperiod">Contact us for a quote</div>
+            <ul class="pfeats">
+              <li>Unlimited everything</li>
+              <li>Multi-state deployment</li>
+              <li>Government API integration</li>
+              <li>Dedicated account manager</li>
+              <li>SLA guarantee</li>
+              <li>On-site training</li>
+            </ul>
+            <button class="pbtn" onclick="goContact()">Contact Sales</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTACT -->
+    <div id="contact" style="background:var(--cream);">
+      <div class="sec">
+        <div class="reveal">
+          <div class="stag">Contact Us</div>
+          <h2 class="sh2">Let's talk crops<br />and technology.</h2>
+          <p class="ssub">Have questions? We're here to help farmers, cooperatives, and state agricultural departments
+            get started with KisanTrack.</p>
+        </div>
+        <div class="cgrid reveal">
+          <!-- Info -->
+          <div>
+            <div class="citem">
+              <div class="cico" style="background:#E8F7EC;">📍</div>
+              <div>
+                <div class="clbl">Office</div>
+                <div class="cval">Agri Tech Hub, Frazer Road,<br />Patna, Bihar 800001</div>
+              </div>
+            </div>
+            <div class="citem">
+              <div class="cico" style="background:#EBF5FB;">📞</div>
+              <div>
+                <div class="clbl">Phone</div>
+                <div class="cval">+91 612 300 7800</div>
+              </div>
+            </div>
+            <div class="citem">
+              <div class="cico" style="background:#FEF3DC;">✉️</div>
+              <div>
+                <div class="clbl">Email</div>
+                <div class="cval">hello@kisantrack.in</div>
+              </div>
+            </div>
+            <div class="citem">
+              <div class="cico" style="background:#E8F7EC;">🕐</div>
+              <div>
+                <div class="clbl">Support Hours</div>
+                <div class="cval">Mon – Sat, 9:00 AM – 6:00 PM IST</div>
+              </div>
+            </div>
+            <div style="margin-top:1.5rem;">
+              <div class="stag" style="display:block;margin-bottom:.8rem;">Active Districts</div>
+              <!-- Pills rendered by JS -->
+              <div id="district-pills"></div>
+            </div>
+          </div>
+          <!-- Form -->
+          <div class="cform">
+            <div style="font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:600;margin-bottom:1.5rem;">
+              Send a message</div>
+            <div class="fg"><label class="flbl">Full Name</label><input type="text" class="finp" id="c-name"
+                placeholder="Raju Prasad" /></div>
+            <div class="fg"><label class="flbl">Email / Phone</label><input type="text" class="finp" id="c-email"
+                placeholder="hello@example.com or +91 XXXXX" /></div>
+            <div class="fg">
+              <label class="flbl">I am a…</label>
+              <select class="finp" id="c-role">
+                <option>Farmer</option>
+                <option>Transporter</option>
+                <option>Warehouse Operator</option>
+                <option>Government / NGO</option>
+                <option>Buyer / Retailer</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="fg"><label class="flbl">Message</label><textarea class="finp" id="c-msg"
+                placeholder="Tell us how we can help…"></textarea></div>
+            <button class="fbtn" onclick="submitContact()">Send Message &#8594;</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="ftop">
+        <div class="fgrid">
+          <div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:.8rem;">
+              <div
+                style="width:32px;height:32px;background:var(--gb);border-radius:50%;display:flex;align-items:center;justify-content:center;">
+                <svg width="16" height="16" viewBox="0 0 22 22" fill="none">
+                  <path d="M11 2C11 2 7 7 7 12a4 4 0 008 0c0-5-4-10-4-10z" fill="#fff" />
+                </svg>
+              </div>
+              <span
+                style="font-family:'Playfair Display',serif;color:#fff;font-size:18px;font-weight:700;">KisanTrack</span>
+            </div>
+            <div class="fbrand">Bringing digital transparency to India's agricultural supply chain. Built for Bihar's
+              18,000+ farmers — since 2026.</div>
+          </div>
+          <div>
+            <div class="fct">Platform</div>
+            <button class="fl" onclick="goHome()">Home</button>
+            <button class="fl" onclick="jumpTo('features')">Features</button>
+            <button class="fl" onclick="jumpTo('pricing')">Pricing</button>
+            <button class="fl" onclick="goLogin()">Login</button>
+          </div>
+          <div>
+            <div class="fct">Stakeholders</div>
+            <button class="fl" onclick="goLogin()">Farmers</button>
+            <button class="fl" onclick="goLogin()">Transporters</button>
+            <button class="fl" onclick="goLogin()">Warehouses</button>
+            <button class="fl" onclick="goLogin()">Buyers</button>
+          </div>
+          <div>
+            <div class="fct">Company</div>
+            <button class="fl" onclick="goContact()">Contact Us</button>
+            <button class="fl">Privacy Policy</button>
+            <button class="fl">Terms of Use</button>
+            <button class="fl">Data Security</button>
+          </div>
+        </div>
+        <div class="fbot">
+          <div style="color:rgba(255,255,255,.4);font-size:.8rem;">&#169; 2026 KisanTrack. All rights reserved. Made
+            with &#10084; for Indian farmers.</div>
+          <div style="color:rgba(255,255,255,.3);font-size:.75rem;">&#127807; Tracking every grain.</div>
+        </div>
+      </div>
+    </footer>
+  </div><!-- /page-home -->
+
+
+  <!-- ════════════════════════════════════
+     PAGE: LOGIN
+════════════════════════════════════ -->
+  <div id="page-login" class="page">
+    <div class="login-wrap">
+      <div class="lcard">
+        <div style="text-align:center;margin-bottom:1.5rem;">
+          <div
+            style="width:52px;height:52px;background:var(--gd);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+            <svg width="28" height="28" viewBox="0 0 22 22" fill="none">
+              <path d="M11 2C11 2 7 7 7 12a4 4 0 008 0c0-5-4-10-4-10z" fill="#fff" opacity=".9" />
+              <path d="M11 12v8M8 15l3-3 3 3" stroke="#fff" stroke-width="1.3" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </div>
+        </div>
+        <div class="ltitle" id="auth-title">Welcome back</div>
+        <div class="lsub" id="auth-sub">Sign in to your KisanTrack account</div>
+
+        <div class="ltabs">
+          <button class="ltab active" id="tab-si" onclick="switchTab('signin')">Sign In</button>
+          <button class="ltab" id="tab-su" onclick="switchTab('signup')">Sign Up</button>
+        </div>
+
+        <div class="socbtns">
+          <button class="socbtn">
+            <svg width="16" height="16" viewBox="0 0 24 24">
+              <path fill="#4285F4"
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+              <path fill="#34A853"
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+              <path fill="#FBBC05"
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" />
+              <path fill="#EA4335"
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+            </svg>
+            Google
+          </button>
+          <button class="socbtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#1877F2">
+              <path
+                d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+            </svg>
+            Facebook
+          </button>
+        </div>
+
+        <div class="divider"><span>or continue with email</span></div>
+
+        <!-- SIGN IN -->
+        <div id="form-signin">
+          <div class="fg"><label class="flbl">Email or Phone</label><input type="text" class="finp" id="si-email"
+              placeholder="hello@kisantrack.in" /></div>
+          <div class="fg">
+            <label class="flbl">Password</label>
+            <div class="pwrap">
+              <input type="password" class="finp" id="si-pass"
+                placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" />
+              <button class="ptog" onclick="togglePass('si-pass',this)" type="button">&#128065;</button>
+            </div>
+          </div>
+          <div class="rrow">
+            <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;"><input type="checkbox"
+                style="accent-color:var(--gb);" /> Remember me</label>
+            <a href="#">Forgot password?</a>
+          </div>
+          <button class="lsubmit" onclick="handleSignIn()">Sign In to KisanTrack</button>
+          <div class="lswitch">Don't have an account? <a onclick="switchTab('signup')">Sign up free &#8594;</a></div>
+        </div>
+
+        <!-- SIGN UP -->
+        <div id="form-signup" style="display:none;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+            <div class="fg"><label class="flbl">First Name</label><input type="text" class="finp" id="su-first"
+                placeholder="Raju" /></div>
+            <div class="fg"><label class="flbl">Last Name</label><input type="text" class="finp" id="su-last"
+                placeholder="Prasad" /></div>
+          </div>
+          <div class="fg"><label class="flbl">Email</label><input type="email" class="finp" id="su-email"
+              placeholder="raju@example.com" /></div>
+          <div class="fg"><label class="flbl">Phone Number</label><input type="tel" class="finp" id="su-phone"
+              placeholder="+91 XXXXX XXXXX" /></div>
+          <div class="fg">
+            <label class="flbl">I am a&#8230;</label>
+            <select class="finp" id="su-role">
+              <option>Farmer</option>
+              <option>Transporter</option>
+              <option>Warehouse Operator</option>
+              <option>Intermediary / Trader</option>
+              <option>Buyer / Retailer</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label class="flbl">Password</label>
+            <div class="pwrap">
+              <input type="password" class="finp" id="su-pass" placeholder="Min. 8 characters" />
+              <button class="ptog" onclick="togglePass('su-pass',this)" type="button">&#128065;</button>
+            </div>
+          </div>
+          <div style="margin-bottom:1.5rem;font-size:.82rem;color:#777;">
+            By signing up you agree to our <a href="#" style="color:var(--gb);font-weight:500;">Terms of Service</a> and
+            <a href="#" style="color:var(--gb);font-weight:500;">Privacy Policy</a>.
+          </div>
+          <button class="lsubmit" onclick="handleSignUp()">Create My Account &#8594;</button>
+          <div class="lswitch">Already have an account? <a onclick="switchTab('signin')">Sign in</a></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /page-login -->
+
+
+  <!-- ════════════════════════════════════
+     POPUP — fires after 6 seconds
+════════════════════════════════════ -->
+  <div id="popup-overlay">
+    <div id="popup-box">
+      <div class="ph">
+        <button class="pclose" onclick="closePopup()">&#215;</button>
+        <div class="ptag">&#127807; Join 18,000+ Farmers</div>
+        <div class="ptitle">Track your crops.<br />Grow your income.</div>
+        <div class="psub">KisanTrack gives you full visibility over your crop's journey — from harvest to final market
+          sale.</div>
+        <div class="ptimer" id="popup-timer">Closes automatically in 30s</div>
+      </div>
+      <div class="pb">
+        <div class="pperks">
+          <div class="pperk">
+            <div class="pdot">&#10003;</div><span>Free forever for individual farmers</span>
+          </div>
+          <div class="pperk">
+            <div class="pdot">&#10003;</div><span>Real-time temperature and location alerts</span>
+          </div>
+          <div class="pperk">
+            <div class="pdot">&#10003;</div><span>See the full price your crop fetches at market</span>
+          </div>
+          <div class="pperk">
+            <div class="pdot">&#10003;</div><span>Works on any smartphone — no app download needed</span>
+          </div>
+        </div>
+        <button class="pcta" onclick="closePopup(); goLogin();">Login / Sign Up Free &#8594;</button>
+        <button class="pskip" onclick="closePopup()">No thanks, I'll browse first</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast"><span id="toast-msg"></span></div>
 
   <script src="stylesheets/script.js"></script>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script>
-    new QRCode(document.getElementById("qrcode"), {
-  text: "https://kisantrack.com/track?cropId=KC-2024-001",
-  width: 150,
-  height: 150,
-  colorDark: "#000",
-  colorLight: "#fff",
-  correctLevel: QRCode.CorrectLevel.H
-});
-gsap.from("#qrcode", {
-  scale: 0,
-  opacity: 0,
-  duration: 1,
-  ease: "back.out(1.7)"
-});
-  </script>
 </body>
 
 </html>
