@@ -45,3 +45,7 @@ npm-debug.log*
 /out
 /bin
 
+# Environment files
+.env
+.env.*
+
