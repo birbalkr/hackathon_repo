@@ -3,5 +3,5 @@
   "oauthServerUrl": "https://au-syd.appid.cloud.ibm.com/oauth/v4/a2d9ed2e-1f2c-4222-ab8c-3fe0af49b0cd",
   "profilesUrl": "https://au-syd.appid.cloud.ibm.com",
   "secret": "OGM0MWFiMmQtMzJkYS00YWZiLTljZjUtMTc2MjBhY2E2NTRh",
-  "tenantId": "a2d9ed2e-1f2c-4222-ab8c-3fe0af49b0cd",
+  "tenantId": "a2d9ed2e-1f2c-4222-ab8c-3fe0af49b0cd"
 }
