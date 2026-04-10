@@ -4,5 +4,5 @@
   "profilesUrl": "https://au-syd.appid.cloud.ibm.com",
   "secret": "OGM0MWFiMmQtMzJkYS00YWZiLTljZjUtMTc2MjBhY2E2NTRh",
   "tenantId": "a2d9ed2e-1f2c-4222-ab8c-3fe0af49b0cd",
-  "redirectUri": "http://localhost:3000/ibm/cloud/appid/callback"
+  "redirectUri": "https://hackathon-repo-0ho2.onrender.com/ibm/cloud/appid/callback"
 }

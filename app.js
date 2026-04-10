@@ -11,7 +11,7 @@ const app = express();
 
 const CALLBACK_URL = "/ibm/cloud/appid/callback";
 
-const port =  3000;
+const port = process.env.PORT || 10000;
 
 app.use(session({
 	secret: "123456",
