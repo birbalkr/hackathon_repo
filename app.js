@@ -72,7 +72,7 @@ function getAppIDConfig() {
 	} catch (e) {
 		if (process.env.APPID_SERVICE_BINDING) { // if running on Kubernetes this env variable would be defined
 			config = JSON.parse(process.env.APPID_SERVICE_BINDING);
-			config.redirectUri = process.env.redirectUri;
+			config.redirectUri = process.env.REDIRECT_URI;
 		} else { // running on CF
 			let vcapApplication = JSON.parse(process.env["VCAP_APPLICATION"]);
 			return { "redirectUri": "https://" + vcapApplication["application_uris"][0] + CALLBACK_URL };
