@@ -1,188 +1,261 @@
-# IBM Cloud App ID
-Node Sample Template App for the IBM Cloud App ID service. The App ID Dashboard overwrites the manifest.yml and localdev-config.json files with the user's information when they download a Node sample app. When downloaded, you can either run the application locally or in IBM Cloud.
+# 🌾 Farm-to-Market Crop Tracking System (Web-Based)
 
-[![IBM Cloud powered][img-ibmcloud-powered]][url-ibmcloud]
-[![Node Badge][img-node-badge]][url-node-badge]
-[![Travis][img-travis-master]][url-travis-master]
-[![Coveralls][img-coveralls-master]][url-coveralls-master]
-[![Codacy][img-codacy]][url-codacy]
+A **web-based crop traceability system** that connects farmers, transporters, warehouses, intermediaries, and retailers on a unified digital platform.
 
-[![GithubWatch][img-github-watchers]][url-github-watchers]
-[![GithubStars][img-github-stars]][url-github-stars]
-[![GithubForks][img-github-forks]][url-github-forks]
 
-## Table of Contents
-* [Contents](#contents)
-* [Requirements](#requirements)
-* [Running Locally](#running-locally)
-* [Running in IBM Cloud](#running-in-ibm-cloud)
-* [Clarification](#clarification)
-* [License](#license)
+## 🌐 Project Type
 
-## Contents
+💻 **Platform**: Web Application
+📦 **Domain**: AgriTech / Supply Chain
+🏆 **Context**: Hackathon Project
 
-`app.js`  Uses Express to set the routes.
+---
 
-`public/index.html`  The application landing page. Click **Login** to start.
+## 🚀 Key Features
 
-`protected/protected.html`  The application's protected page. After clicking the **Login** button, the user is redirected here. This is where
-we check whether the user is authorized or not. In the case where the user is not authorized, we send a request to the
-authentication server to start the OAuth flow. If the user is authorized, we show the protected data.
+* 👥 Stakeholder registration & verified profiles
+* 🏷️ QR/RFID-based crop batch tracking
+* 🗄️ Centralized database for traceability
+* 📍 Real-time location tracking
+* 📱 QR scan for consumer transparency
+* 📊 Analytics dashboard
+* 📑 Automated compliance reporting (EUDR)
 
-## Requirements
-* Node 6.0.0 or higher
+---
 
-## Running Locally
+## 🧑‍🤝‍🧑 Team Members
 
-Run the following commands:
-```bash
+> Replace with your actual team details:
+
+* Member 1 – Frontend Developer
+* Member 2 – Backend Developer
+* Member 3 – Database Engineer
+* Member 4 – IoT Integration
+* Member 5 – UI/UX Designer
+
+---
+
+## 🏗️ System Architecture Overview
+
+1. **Frontend (Web App)** – User interface for all stakeholders
+2. **Backend Server** – Handles APIs, authentication, and logic
+3. **Database** – Stores all tracking and user data
+4. **IoT Integration** – Sensors send real-time environmental data
+5. **QR System** – Enables easy tracking and verification
+
+---
+
+## ⚙️ Step-by-Step System Workflow
+
+### 1️⃣ Stakeholder Registration
+
+* All stakeholders register on the website:
+
+  * Farmers
+  * Transporters
+  * Warehouses
+  * Intermediaries
+  * Retailers
+* Profiles are verified by the system
+* Unique IDs assigned to each user
+
+---
+
+### 2️⃣ Crop Batch Creation
+
+* Farmer logs into the web dashboard
+* Creates a new crop batch
+* System generates:
+
+  * **QR code or RFID tag**
+* Tag is linked to the database record
+
+---
+
+### 3️⃣ Initial Data Entry
+
+* Farmer enters:
+
+  * Crop type
+  * Planting date
+  * Harvest date
+  * Farm location
+  * Farmer details
+* Data is stored in the centralized database
+
+---
+
+### 4️⃣ IoT Sensor Integration
+
+* Sensors installed in:
+
+  * Storage units
+  * Transport vehicles
+* Automatically track:
+
+  * Temperature
+  * Humidity
+  * GPS location
+* Data is sent to backend via APIs and displayed on dashboard
+
+---
+
+### 5️⃣ Supply Chain Tracking
+
+* Each stakeholder updates batch status:
+
+  * Collection
+  * Warehousing
+  * Transportation
+  * Retail
+* Each update includes:
+
+  * Timestamp
+  * Location
+  * Condition data
+
+---
+
+### 6️⃣ Data Logging & Traceability
+
+* All updates stored securely in database
+* Maintains full history of product journey
+* Enables quick retrieval and reporting
+
+---
+
+### 7️⃣ Consumer Verification
+
+* QR code scanned via smartphone browser
+* Displays:
+
+  * Full product journey
+  * Handling conditions
+  * Quality details
+
+---
+
+### 8️⃣ Compliance Reporting
+
+* System extracts traceability data
+* Automatically generates reports for:
+
+  * **EUDR (EU Deforestation Regulation)**
+* Export options: PDF / CSV
+
+---
+
+### 9️⃣ Analytics Dashboard
+
+* Provides insights such as:
+
+  * Supply chain efficiency
+  * Loss tracking
+  * Delivery performance
+  * Environmental condition trends
+
+---
+
+## 🛠️ Tech Stack (Without Blockchain)
+
+* **Frontend**: React.js / HTML / CSS / JavaScript
+* **Backend**: Node.js / Express.js
+* **Database**: MongoDB / PostgreSQL
+* **IoT Integration**: REST APIs / MQTT
+* **QR Code**: QR generation libraries (e.g., qrcode.js)
+* **Hosting**: Vercel / Netlify / AWS
+
+---
+
+## 📦 Installation & Setup
+
+```bash id="setup45678"
+# Clone the repository
+git clone https://github.com/your-username/farm-tracking-system.git
+
+# Navigate to project directory
+cd farm-tracking-system
+
+# Install dependencies
 npm install
-npm start
+
+# Start development server
+npm run dev
 ```
-Use the link http://localhost:3000 to load the web application in browser.
 
-## Running in Cloud Foundry
+## 🔥 Firebase Realtime Database Setup
 
-### Prerequisites
-Before you begin, make sure that IBM Cloud CLI is installed.
-For more information visit: https://cloud.ibm.com/docs/cli?topic=cloud-cli-getting-started.
+The protected dashboard now fetches live records from Firebase Realtime Database:
 
-### Deployment
+1. Create a Realtime Database in your Firebase project (start in test mode for development).
+2. Confirm your Realtime Database URL in [config.js](config.js) and [public/stylesheets/realtime-db.js](public/stylesheets/realtime-db.js).
+3. Set Firebase Realtime Database rules for development:
 
-**Important:** Before going live, remove http://localhost:3000/* from the list of web redirect URLs located in "Manage Authentication" -> "Authentication Settings" page in the AppID dashboard.
+```json
+{
+  "rules": {
+    ".read": true,
+    ".write": true
+  }
+}
+```
 
-1. Login to IBM Cloud.
+4. Start the app and login with IBM App ID.
+5. Open `/protected/protected.html` to view live crop updates fetched from Realtime Database.
 
-  `ibmcloud login -a https://api.{{domain}}`
+Before production, lock down rules to authenticated users only.
 
-2. Target a Cloud Foundry organization and space in which you have at least Developer role access:
+---
 
-  Use `ibmcloud target --cf` to target Cloud Foundry org/space interactively.
+## 🌍 How to Use
 
-3. Bind the sample app to the instance of App ID:
+1. Open the web app in your browser
+2. Register/Login as a stakeholder
+3. Farmers create crop batches
+4. Track movement across supply chain
+5. Update status at each stage
+6. Scan QR codes to verify product journey
+7. Use dashboard for insights
 
-  `ibmcloud resource service-alias-create "appIDInstanceName-alias" --instance-name "appIDInstanceName" -s {{space}}`
-  
-4. Add the alias to the manifest.yml file in the sample app.
+---
 
-   ```
-   applications:
-        - name: [app-instance-name]
-        memory: 256M
-        services:
-        - appIDInstanceName-alias
-   ```
+## 🎯 Problem Solved
 
-5. Deploy the sample application to IBM Cloud. From the app's folder do:
+* ❌ Lack of transparency in supply chains
+* ❌ Manual record keeping
+* ❌ High post-harvest losses
+* ❌ Difficult compliance processes
 
-  `ibmcloud app push`
-  
-6. Now configure the OAuth redirect URL at the App ID dashboard so it will approve redirecting to your cluster. Go to your App ID instance at [IBM Cloud console](https://cloud.ibm.com/resources) and under Manage Authentication->Authentication Settings->Add web redirect URLs add the following URL:
+✅ This system provides a **simple, scalable, and practical digital solution**
 
-   `https://{App Domain}/ibm/cloud/appid/callback`
-   
-   You find your app's domain by visiting Cloud Foundry Apps at the IBM Cloud dashboard: https://cloud.ibm.com/resources.
+---
 
-7. Open your IBM Cloud app route in the browser.
+## 🔮 Future Enhancements
 
-## Running in Kubernetes
+* AI-based spoilage prediction
+* Mobile app version
+* Offline support for rural areas
+* SMS alerts for farmers
+* Integration with government systems
 
-### Prerequisites
-Before you begin make sure that IBM Cloud CLI, docker and kubectl installed and that you have a running kubernetes cluster.
-You also need an IBM Cloud container registry namespace (see https://cloud.ibm.com/kubernetes/registry/main/start). You can find your registry domain and repository namespace using `ibmcloud cr namespaces`.
+---
 
-### Deployment
+## 📜 License
 
-**Important:** Before going live, remove http://localhost:3000/* from the list of web redirect URLs located in "Manage Authentication" -> "Authentication Settings" page in the AppID dashboard.
+This project is developed for a hackathon and can be extended further.
 
-**Note:** Your App ID instance name must consist of lower case alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character. You can visit the App ID dashboard to change your instance name. 
+---
 
-1. Login to IBM Cloud.
+## 🙌 Acknowledgements
 
-    `ibmcloud login -a https://api.{{domain}}`
-  
-2. Run the following command, it will output an export command.
+* Hackathon organizers
+* Open-source community
+* Team collaboration
 
-    `ibmcloud cs cluster-config {CLUSTER_NAME}`
-    
-3. Set the KUBECONFIG environment variable. Copy the output from the previous command and paste it in your terminal. The command output looks similar to the following example:
-   
-    `export KUBECONFIG=/Users/$USER/.bluemix/plugins/container-service/clusters/mycluster/kube-config-hou02-mycluster.yml`
+---
 
-4. Bind the instance of App ID to your cluster.
+## ⭐ Contributing
 
-    `ibmcloud cs cluster-service-bind {CLUSTER_NAME} default {APP_ID_INSTANCE_NAME}`
-    
-5. Find your cluster's public endpoint {CLUSTER_ENDPOINT}.
-   
-   Note: If you are using the free version of kubernetes (with only 1 worker node) you can use your node's public IP instead, which you can find using:
+Pull requests are welcome! Feel free to improve features, UI, or performance.
 
-    `ibmcloud cs workers {CLUSTER_NAME}`
-
-6. Edit the kube_deployment.yml file. 
-    1. Edit the image field of the deployment section to match your image name. The name of your image should be `{REGISTRY_DOMAIN}/{REPOSITORY_NAMESPACE}/appid-node-sample:{APP_VERSION}`). 
-    2. Edit the Binding name field to match yours. It should be `binding-{APP_ID_INSTANCE_NAME}`.
-    3. Edit redirectUri's value to include your cluster's IP. The value should be `http://{CLUSTER_ENDPOINT}/ibm/cloud/appid/callback`
-    4. Optional: Change the value of metadata.namespace from default to your cluster namespace if you’re using a different namespace.
-
-7. Build your Docker image.
-   
-    `docker build -t {REGISTRY_DOMAIN}/{REPOSITORY_NAMESPACE}/appid-node-sample:{APP_VERSION} .`
-    
-8. Push the image.
-   
-    `docker push {REGISTRY_DOMAIN}/{REPOSITORY_NAMESPACE}/appid-node-sample:{APP_VERSION}`
-   
-    `kubectl apply -f kube_deployment.yml`
-
-9. Now configure the OAuth redirect URL at the App ID dashboard so it will approve redirecting to your cluster. Go to your App ID instance at [IBM Cloud console](https://cloud.ibm.com/resources) and under Manage Authentication->Authentication Settings->Add web redirect URLs add the following URL:
-
-   `https://{CLUSTER_ENDPOINT}:30000/ibm/cloud/appid/callback`
-
-10. You can see your sample running on Kubernetes in IBM Cloud.
-   
-    `open http://{CLUSTER_ENDPOINT}:30000`
-
-## Clarification
-This sample runs on one instance and uses the session to store the authorization data.
-In order to run it in production mode, use services such as Redis to store the relevant data.
-
-
-## Got Questions?
-Join us on [Slack](https://www.ibm.com/cloud/blog/announcements/get-help-with-ibm-cloud-app-id-related-questions-on-slack) and chat with our dev team.
-
-## See More
-#### Protecting Node.js Web Applications with IBM Cloud App ID
-https://www.youtube.com/watch?v=6roa1ZOvwtw
-
-## License
-
-Copyright (c) 2019 IBM Corporation
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-[img-ibmcloud-powered]: https://img.shields.io/badge/ibm%20cloud-powered-blue.svg
-[url-ibmcloud]: https://www.ibm.com/cloud/
-
-[img-node-badge]: https://img.shields.io/badge/platform-node-lightgrey.svg?style=flat
-[url-node-badge]: https://developer.node.com/index.html
-
-[img-travis-master]: https://travis-ci.org/ibm-cloud-security/app-id-sample-node.svg?branch=master
-[url-travis-master]: https://travis-ci.org/ibm-cloud-security/app-id-sample-node?branch=master
-
-[img-coveralls-master]: https://coveralls.io/repos/github/ibm-cloud-security/app-id-sample-node/badge.svg
-[url-coveralls-master]: https://coveralls.io/github/ibm-cloud-security/app-id-sample-node
-
-[img-codacy]: https://api.codacy.com/project/badge/Grade/fb042b4cb2f048968b567cde2251edcc
-[url-codacy]: https://www.codacy.com/app/ibm-cloud-security/app-id-sample-node
-
-[img-github-watchers]: https://img.shields.io/github/watchers/ibm-cloud-security/app-id-sample-node.svg?style=social&label=Watch
-[url-github-watchers]: https://github.com/ibm-cloud-security/app-id-sample-node/watchers
-[img-github-stars]: https://img.shields.io/github/stars/ibm-cloud-security/app-id-sample-node.svg?style=social&label=Star
-[url-github-stars]: https://github.com/ibm-cloud-security/app-id-sample-node/stargazers
-[img-github-forks]: https://img.shields.io/github/forks/ibm-cloud-security/app-id-sample-node.svg?style=social&label=Fork
-[url-github-forks]: https://github.com/ibm-cloud-security/app-id-sample-node/network
+---

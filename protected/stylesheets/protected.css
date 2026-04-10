@@ -141,3 +141,98 @@ body {
 #menu li a {
     color: black;
 }
+
+.realtime-panel {
+    margin-top: 28px;
+    margin-right: 90px;
+    padding: 16px;
+    border-radius: 8px;
+    background: #F5F7FA;
+    box-shadow: 0 1px 2px 0 rgba(140, 155, 165, 0.25);
+}
+
+.db-status {
+    font-family: IBMPlexSans;
+    font-size: 13px;
+    color: #4178BE;
+    margin-bottom: 10px;
+}
+
+.update-form {
+    margin: 14px 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.update-form input {
+    border: 1px solid #c1c7cd;
+    border-radius: 6px;
+    padding: 8px;
+    font-family: IBMPlexSans;
+    font-size: 13px;
+}
+
+.save-update-btn {
+    grid-column: 1 / -1;
+    background: #4178BE;
+    border: none;
+    color: #FFFFFF;
+    border-radius: 6px;
+    padding: 9px 12px;
+    font-family: IBMPlexSans-Medium;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.save-update-btn:hover {
+    background: #3769a6;
+}
+
+.updates-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.updates-list li {
+    background: #FFFFFF;
+    border: 1px solid #dfe3e6;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+}
+
+.update-title {
+    font-family: IBMPlexSans-Medium;
+    font-size: 14px;
+    color: #152934;
+    margin-bottom: 4px;
+}
+
+.update-meta {
+    font-family: IBMPlexSans;
+    font-size: 12px;
+    color: #5a6872;
+}
+
+.empty-update {
+    font-family: IBMPlexSans;
+    font-size: 13px;
+    color: #5a6872;
+}
+
+@media (max-width: 900px) {
+    .middle-container {
+        margin-left: 5%;
+    }
+
+    .realtime-panel,
+    .token-info {
+        margin-right: 5%;
+    }
+
+    .update-form {
+        grid-template-columns: 1fr;
+    }
+}

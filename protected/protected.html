@@ -1,59 +1,745 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <title>Sample App</title>
-    <link rel='stylesheet' href='stylesheets/protected.css'/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel='stylesheet' href='stylesheets/protected.css' />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://code.jquery.com/jquery-3.1.1.js"></script>
     <script src="jquery.json-viewer.js"></script>
-    <link href="stylesheets/jquery.json-viewer.css" type="text/css" rel="stylesheet"/>
+    <link href="stylesheets/jquery.json-viewer.css" type="text/css" rel="stylesheet" />
+    <title>KisanTrack — Agricultural Supply Chain</title>
+    <script src="tailwind-config.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="stylesheets/protected-dashboard.css" />
 </head>
-<body>
-<div id="maindiv" role="main" class="maindiv">
-    <div class="top-container">
-        <div class="top">
-            <div class="logout">
-                <a aria-label="logout" href='/logout'>
-                    <img class="logout-icon" href='/logout' id="logoutIcon"
-                                       src="images/logout.svg" alt="logout">
-                </a>
+
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+
+    <!-- ============================================================
+     HEADER
+============================================================ -->
+    <header class="bg-green-dark sticky top-0 z-50 px-7 flex items-center justify-between h-16">
+        <!-- Logo -->
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 bg-green-bright rounded-full flex items-center justify-center flex-shrink-0">
+                <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                    <path d="M11 2C11 2 7 7 7 12a4 4 0 008 0c0-5-4-10-4-10z" fill="#fff" opacity=".9" />
+                    <path d="M11 12v8M8 15l3-3 3 3" stroke="#fff" stroke-width="1.3" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    <path d="M5 10c-1 0-3 1.5-3 4M17 10c1 0 3 1.5 3 4" stroke="#fff" stroke-width="1.1"
+                        stroke-linecap="round" opacity=".6" />
+                </svg>
+            </div>
+            <div>
+                <div class="font-display text-white text-xl font-bold tracking-wide leading-tight">KisanTrack</div>
+                <div class="text-green-pale text-[10px] tracking-[2px] font-medium uppercase">Since 2026</div>
             </div>
         </div>
-    </div>
 
-    <div class="middle-container">
-        <div class="hello-text">
-            Hi <span id="userNameSpan"></span>, Congratulations!<br>
-            You’ve made your first authentication.<br>
-        </div>
-        <div class="above-button-text">
-            What you can do next:
-        </div>
-        <a href="https://cloud.ibm.com/docs/services/appid?topic=appid-web-apps" target="_blank">
-            <button class="button">
-                <div class="button-text">
-                    Add App ID to your own app
-                </div>
+        <!-- Header Stats -->
+        <div class="flex items-center gap-6">
+            <div class="text-center hidden sm:block">
+                <div class="text-white text-base font-semibold" id="hdr-batches">2,847</div>
+                <div class="text-green-pale text-[10px] tracking-widest uppercase">Batches Live</div>
+            </div>
+            <div class="text-center hidden sm:block">
+                <div class="text-white text-base font-semibold">18,400</div>
+                <div class="text-green-pale text-[10px] tracking-widest uppercase">Farmers</div>
+            </div>
+            <div class="text-center hidden md:block">
+                <div class="text-white text-base font-semibold">94.2%</div>
+                <div class="text-green-pale text-[10px] tracking-widest uppercase">On-Time Rate</div>
+            </div>
+            <button onclick="openScan()"
+                class="bg-green-bright hover:bg-green-light text-white text-sm font-medium px-5 py-2 rounded-full transition-colors">
+                + New Batch
             </button>
-        </a>
-    </div>
-
-    <div class="bottom-container">
-        <div class="bottom-container-data">
-            <div class="token-title">
-                ID Token
-            </div>
-            <div id="idTokenPayload" class="token-info"></div>
         </div>
-    </div>
-</div>
+    </header>
 
-<script>
-	$.getJSON('/protected/api/idPayload', function (id_token) {
-		$('#userNameSpan').html(id_token.name);
-		$('#idTokenPayload').jsonViewer(id_token, {collapsed: false});
-	});
-</script>
+    <!-- ============================================================
+     TABS
+============================================================ -->
+    <nav class="bg-green-mid px-7 flex gap-1">
+        <button onclick="setTab(this,'overview')"
+            class="tab-btn active text-white/60 text-sm font-medium px-5 py-3 hover:text-white transition-colors">Overview</button>
+        <button onclick="setTab(this,'batches')"
+            class="tab-btn text-white/60 text-sm font-medium px-5 py-3 hover:text-white transition-colors">Crop
+            Batches</button>
+        <button onclick="setTab(this,'quality')"
+            class="tab-btn text-white/60 text-sm font-medium px-5 py-3 hover:text-white transition-colors">Quality
+            Control</button>
+        <button onclick="setTab(this,'stakeholders')"
+            class="tab-btn text-white/60 text-sm font-medium px-5 py-3 hover:text-white transition-colors">Stakeholders</button>
+        <button onclick="setTab(this,'analytics')"
+            class="tab-btn text-white/60 text-sm font-medium px-5 py-3 hover:text-white transition-colors">Analytics</button>
+    </nav>
+
+    <!-- ============================================================
+     MAIN
+============================================================ -->
+    <main class="max-w-7xl mx-auto px-7 py-6">
+
+        <section class="ops-layout mb-6">
+            <div class="farmers-panel bg-white border border-green-pale rounded-2xl shadow-sm">
+                <div class="ops-head">Farmer List</div>
+                <div id="farmerList" class="farmer-list"></div>
+            </div>
+
+            <div class="tracking-panel bg-white border border-green-pale rounded-2xl shadow-sm">
+                <div class="ops-head">Tracking</div>
+                <div class="tracking-top">
+                    <div>
+                        <div id="trackFarmer" class="track-title">Select farmer</div>
+                        <div id="trackMeta" class="track-meta">Track ID and route will appear here.</div>
+                        <div id="trackStatus" class="track-chip">Pending</div>
+                    </div>
+                    <img id="cropImage" class="crop-image" src="https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=900&q=60" alt="Crop" />
+                </div>
+
+                <div class="history-wrap">
+                    <div class="history-head">Crop History & Updates</div>
+                    <ul id="historyList" class="history-list"></ul>
+                </div>
+
+                <div class="scanner-grid">
+                    <div class="scanner-left">
+                        <div class="history-head">Scan QR / Track ID</div>
+                        <input id="scanInput" class="scan-input" type="text" placeholder="Example: TRK-2041 or QR:TRK-2041">
+                        <button id="scanBtn" class="scan-btn" type="button">Scan</button>
+                    </div>
+                    <div class="scanner-right">
+                        <div class="history-head">QR Data</div>
+                        <div id="qrDataBox" class="qr-data-box">No data scanned yet.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- METRIC CARDS -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <!-- Card 1 -->
+            <div onclick="metricDetail('crops')"
+                class="card-hover bg-white border border-green-pale rounded-2xl p-5 shadow-sm relative overflow-hidden cursor-pointer">
+                <div class="absolute top-0 left-0 w-1 h-full bg-green-bright rounded-l-2xl"></div>
+                <div class="text-[11px] font-semibold tracking-widest uppercase text-gray-400 mb-2 pl-2">Crops Tracked
+                </div>
+                <div class="text-3xl font-bold pl-2 mb-1">12,485</div>
+                <div class="text-xs text-gray-400 pl-2">Tonnes this season</div>
+                <span
+                    class="absolute top-4 right-4 bg-green-pale text-green-mid text-xs font-semibold px-2 py-0.5 rounded-full">+8.4%</span>
+            </div>
+            <!-- Card 2 -->
+            <div onclick="metricDetail('transit')"
+                class="card-hover bg-white border border-green-pale rounded-2xl p-5 shadow-sm relative overflow-hidden cursor-pointer">
+                <div class="absolute top-0 left-0 w-1 h-full bg-amber rounded-l-2xl"></div>
+                <div class="text-[11px] font-semibold tracking-widest uppercase text-gray-400 mb-2 pl-2">In Transit
+                </div>
+                <div class="text-3xl font-bold pl-2 mb-1" id="transit-count">342</div>
+                <div class="text-xs text-gray-400 pl-2">Active shipments</div>
+                <span
+                    class="absolute top-4 right-4 bg-amber-pale text-amber text-xs font-semibold px-2 py-0.5 rounded-full">+12%</span>
+            </div>
+            <!-- Card 3 -->
+            <div onclick="metricDetail('quality')"
+                class="card-hover bg-white border border-green-pale rounded-2xl p-5 shadow-sm relative overflow-hidden cursor-pointer">
+                <div class="absolute top-0 left-0 w-1 h-full bg-kblue rounded-l-2xl"></div>
+                <div class="text-[11px] font-semibold tracking-widest uppercase text-gray-400 mb-2 pl-2">Quality Passed
+                </div>
+                <div class="text-3xl font-bold pl-2 mb-1">96.1%</div>
+                <div class="text-xs text-gray-400 pl-2">Of inspected batches</div>
+                <span
+                    class="absolute top-4 right-4 bg-kblue-pale text-kblue text-xs font-semibold px-2 py-0.5 rounded-full">+1.2%</span>
+            </div>
+            <!-- Card 4 -->
+            <div onclick="metricDetail('waste')"
+                class="card-hover bg-white border border-green-pale rounded-2xl p-5 shadow-sm relative overflow-hidden cursor-pointer">
+                <div class="absolute top-0 left-0 w-1 h-full bg-red-500 rounded-l-2xl"></div>
+                <div class="text-[11px] font-semibold tracking-widest uppercase text-gray-400 mb-2 pl-2">Wastage Reduced
+                </div>
+                <div class="text-3xl font-bold pl-2 mb-1">28.3%</div>
+                <div class="text-xs text-gray-400 pl-2">vs. pre-platform avg</div>
+                <span
+                    class="absolute top-4 right-4 bg-green-pale text-green-mid text-xs font-semibold px-2 py-0.5 rounded-full">−28%</span>
+            </div>
+        </div>
+
+        <!-- STAKEHOLDER BAR -->
+        <div
+            class="grid grid-cols-3 md:grid-cols-5 border border-green-pale rounded-2xl overflow-hidden bg-white shadow-sm mb-6">
+            <div onclick="filterSH(this,'farmer')"
+                class="sh-btn active flex flex-col items-center py-4 px-3 cursor-pointer border-r border-green-pale">
+                <div class="w-10 h-10 bg-green-pale rounded-full flex items-center justify-center text-xl mb-2">🌾</div>
+                <div class="text-xs font-semibold text-gray-800">Farmers</div>
+                <div class="text-[11px] text-gray-400">18,400 registered</div>
+                <div class="w-2 h-2 rounded-full bg-green-bright mt-1"></div>
+            </div>
+            <div onclick="filterSH(this,'transporter')"
+                class="sh-btn flex flex-col items-center py-4 px-3 cursor-pointer border-r border-green-pale">
+                <div class="w-10 h-10 bg-kblue-pale rounded-full flex items-center justify-center text-xl mb-2">🚛</div>
+                <div class="text-xs font-semibold text-gray-800">Transporters</div>
+                <div class="text-[11px] text-gray-400">1,230 vehicles</div>
+                <div class="w-2 h-2 rounded-full bg-kblue mt-1"></div>
+            </div>
+            <div onclick="filterSH(this,'warehouse')"
+                class="sh-btn flex flex-col items-center py-4 px-3 cursor-pointer border-r border-green-pale">
+                <div class="w-10 h-10 bg-amber-pale rounded-full flex items-center justify-center text-xl mb-2">🏭</div>
+                <div class="text-xs font-semibold text-gray-800">Warehouses</div>
+                <div class="text-[11px] text-gray-400">284 facilities</div>
+                <div class="w-2 h-2 rounded-full bg-amber mt-1"></div>
+            </div>
+            <div onclick="filterSH(this,'intermediary')"
+                class="sh-btn flex flex-col items-center py-4 px-3 cursor-pointer border-r border-green-pale">
+                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-xl mb-2">🤝</div>
+                <div class="text-xs font-semibold text-gray-800">Intermediaries</div>
+                <div class="text-[11px] text-gray-400">3,480 agents</div>
+                <div class="w-2 h-2 rounded-full bg-purple-500 mt-1"></div>
+            </div>
+            <div onclick="filterSH(this,'seller')" class="sh-btn flex flex-col items-center py-4 px-3 cursor-pointer">
+                <div class="w-10 h-10 bg-red-50 rounded-full flex items-center justify-center text-xl mb-2">🛒</div>
+                <div class="text-xs font-semibold text-gray-800">Sellers</div>
+                <div class="text-[11px] text-gray-400">6,720 outlets</div>
+                <div class="w-2 h-2 rounded-full bg-red-500 mt-1"></div>
+            </div>
+        </div>
+
+        <!-- ALERTS -->
+        <div class="flex flex-col gap-3 mb-6">
+            <div
+                class="flex items-start gap-3 bg-amber-pale border-l-4 border-amber rounded-xl px-4 py-3 text-sm text-yellow-900">
+                <span class="text-base mt-0.5 flex-shrink-0">⚠</span>
+                <span class="flex-1"><strong>Temperature alert</strong> — Batch #KT-2041 (Rice, 2.4T) storage temp
+                    exceeded 32°C at Patna Cold Chain Facility. Immediate inspection recommended.</span>
+                <span class="text-[11px] text-yellow-700 whitespace-nowrap">12 min ago</span>
+            </div>
+            <div
+                class="flex items-start gap-3 bg-kblue-pale border-l-4 border-kblue rounded-xl px-4 py-3 text-sm text-blue-900">
+                <span class="text-base mt-0.5 flex-shrink-0">📍</span>
+                <span class="flex-1"><strong>Batch #KT-1998</strong> (Wheat, 5.1T) departed Muzaffarpur Warehouse — ETA
+                    to Patna Market: 3h 20min via NH-77.</span>
+                <span class="text-[11px] text-blue-700 whitespace-nowrap">34 min ago</span>
+            </div>
+            <div
+                class="flex items-start gap-3 bg-green-pale border-l-4 border-green-bright rounded-xl px-4 py-3 text-sm text-green-900">
+                <span class="text-base mt-0.5 flex-shrink-0">✓</span>
+                <span class="flex-1"><strong>Quality verified</strong> — Batch #KT-1924 (Maize, 1.8T) passed Grade-A
+                    inspection at Bihar State Grading Lab. Ready for premium markets.</span>
+                <span class="text-[11px] text-green-700 whitespace-nowrap">1h ago</span>
+            </div>
+        </div>
+
+        <!-- TWO-COL: Journey + Batches -->
+        <div class="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-5 mb-6">
+
+            <!-- Supply Chain Journey -->
+            <div class="bg-white border border-green-pale rounded-2xl shadow-sm overflow-hidden">
+                <div class="px-6 py-4 border-b border-green-pale flex items-start justify-between gap-3">
+                    <div>
+                        <div class="font-display text-lg font-semibold">Supply Chain Journey</div>
+                        <div class="text-xs text-gray-400 mt-0.5" id="batch-subtitle">Batch #KT-2038 · Paddy Rice ·
+                            Samastipur</div>
+                    </div>
+                    <select onchange="switchBatch(this.value)"
+                        class="text-xs border border-green-pale rounded-lg px-3 py-2 bg-white text-gray-700 cursor-pointer">
+                        <option value="kt2038">KT-2038 Paddy</option>
+                        <option value="kt1998">KT-1998 Wheat</option>
+                        <option value="kt1924">KT-1924 Maize</option>
+                        <option value="kt2041">KT-2041 Rice</option>
+                    </select>
+                </div>
+                <div class="px-6 py-5">
+                    <!-- Journey Stages -->
+                    <div class="flex flex-col gap-0" id="journey-stages">
+
+                        <!-- Stage 1 -->
+                        <div class="stage-item relative flex gap-4 cursor-pointer rounded-xl px-3 py-3 mb-1 stage-line"
+                            onclick="expandStage(this)">
+                            <div
+                                class="w-8 h-8 rounded-full bg-green-bright text-white flex items-center justify-center text-sm font-bold flex-shrink-0 z-10">
+                                ✓</div>
+                            <div class="flex-1">
+                                <div class="text-sm font-semibold">🌾 Farmer — Harvested</div>
+                                <div class="text-xs text-gray-400 mt-0.5">Raju Prasad, Village Bidupur · 3.2 Tonnes
+                                </div>
+                                <span
+                                    class="inline-block bg-green-pale text-green-dark text-[10px] font-semibold px-2 py-0.5 rounded-md mt-1 tracking-wide">Verified</span>
+                            </div>
+                            <div class="text-xs text-gray-400 font-semibold whitespace-nowrap">Apr 3</div>
+                        </div>
+
+                        <!-- Stage 2 -->
+                        <div class="stage-item relative flex gap-4 cursor-pointer rounded-xl px-3 py-3 mb-1 stage-line"
+                            onclick="expandStage(this)">
+                            <div
+                                class="w-8 h-8 rounded-full bg-green-bright text-white flex items-center justify-center text-sm font-bold flex-shrink-0 z-10">
+                                ✓</div>
+                            <div class="flex-1">
+                                <div class="text-sm font-semibold">🔬 Quality Check</div>
+                                <div class="text-xs text-gray-400 mt-0.5">Grade A · Moisture 13.2% · No pesticide
+                                    residue</div>
+                                <span
+                                    class="inline-block bg-green-pale text-green-dark text-[10px] font-semibold px-2 py-0.5 rounded-md mt-1 tracking-wide">Passed</span>
+                            </div>
+                            <div class="text-xs text-gray-400 font-semibold whitespace-nowrap">Apr 4</div>
+                        </div>
+
+                        <!-- Stage 3 -->
+                        <div class="stage-item relative flex gap-4 cursor-pointer rounded-xl px-3 py-3 mb-1 stage-line"
+                            onclick="expandStage(this)">
+                            <div
+                                class="w-8 h-8 rounded-full bg-green-bright text-white flex items-center justify-center text-sm font-bold flex-shrink-0 z-10">
+                                ✓</div>
+                            <div class="flex-1">
+                                <div class="text-sm font-semibold">🏭 Primary Processing</div>
+                                <div class="text-xs text-gray-400 mt-0.5">Samastipur Agri Hub · Cleaned &amp; Sorted
+                                </div>
+                                <span
+                                    class="inline-block bg-green-pale text-green-dark text-[10px] font-semibold px-2 py-0.5 rounded-md mt-1 tracking-wide">Complete</span>
+                            </div>
+                            <div class="text-xs text-gray-400 font-semibold whitespace-nowrap">Apr 5</div>
+                        </div>
+
+                        <!-- Stage 4 — ACTIVE -->
+                        <div class="stage-item relative flex gap-4 cursor-pointer rounded-xl px-3 py-3 mb-1 stage-line"
+                            onclick="expandStage(this)">
+                            <div
+                                class="w-8 h-8 rounded-full bg-amber dot-active text-white flex items-center justify-center text-sm font-bold flex-shrink-0 z-10">
+                                →</div>
+                            <div class="flex-1">
+                                <div class="text-sm font-semibold">🚛 In Transit</div>
+                                <div class="text-xs text-gray-400 mt-0.5">Vehicle BR-15-G-4821 · ETA Patna: 2h 10min ·
+                                    Temp: 28°C</div>
+                                <span
+                                    class="inline-block bg-amber-pale text-yellow-700 text-[10px] font-semibold px-2 py-0.5 rounded-md mt-1 tracking-wide">Live
+                                    Tracking</span>
+                            </div>
+                            <div class="text-xs text-amber font-semibold whitespace-nowrap">Now</div>
+                        </div>
+
+                        <!-- Stage 5 -->
+                        <div class="stage-item relative flex gap-4 cursor-pointer rounded-xl px-3 py-3 mb-1 stage-line"
+                            onclick="expandStage(this)">
+                            <div
+                                class="w-8 h-8 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center text-sm font-bold flex-shrink-0 z-10">
+                                5</div>
+                            <div class="flex-1">
+                                <div class="text-sm font-semibold text-gray-400">🏪 Warehouse Storage</div>
+                                <div class="text-xs text-gray-300 mt-0.5">Patna Cold Chain Facility · Pre-booked</div>
+                                <span
+                                    class="inline-block bg-gray-100 text-gray-400 text-[10px] font-semibold px-2 py-0.5 rounded-md mt-1 tracking-wide">Pending</span>
+                            </div>
+                            <div class="text-xs text-gray-300 font-semibold whitespace-nowrap">Apr 10</div>
+                        </div>
+
+                        <!-- Stage 6 -->
+                        <div class="stage-item relative flex gap-4 cursor-pointer rounded-xl px-3 py-3 mb-1 stage-line"
+                            onclick="expandStage(this)">
+                            <div
+                                class="w-8 h-8 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center text-sm font-bold flex-shrink-0 z-10">
+                                6</div>
+                            <div class="flex-1">
+                                <div class="text-sm font-semibold text-gray-400">🤝 Intermediary Sale</div>
+                                <div class="text-xs text-gray-300 mt-0.5">Bihar Agri Traders Pvt. Ltd · Price locked:
+                                    ₹2,180/q</div>
+                                <span
+                                    class="inline-block bg-gray-100 text-gray-400 text-[10px] font-semibold px-2 py-0.5 rounded-md mt-1 tracking-wide">Scheduled</span>
+                            </div>
+                            <div class="text-xs text-gray-300 font-semibold whitespace-nowrap">Apr 13</div>
+                        </div>
+
+                        <!-- Stage 7 -->
+                        <div class="stage-item relative flex gap-4 cursor-pointer rounded-xl px-3 py-3"
+                            onclick="expandStage(this)">
+                            <div
+                                class="w-8 h-8 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center text-sm font-bold flex-shrink-0 z-10">
+                                7</div>
+                            <div class="flex-1">
+                                <div class="text-sm font-semibold text-gray-400">🛒 Final Market Sale</div>
+                                <div class="text-xs text-gray-300 mt-0.5">Patna City Market · Projected: ₹2,340/q</div>
+                                <span
+                                    class="inline-block bg-gray-100 text-gray-400 text-[10px] font-semibold px-2 py-0.5 rounded-md mt-1 tracking-wide">Upcoming</span>
+                            </div>
+                            <div class="text-xs text-gray-300 font-semibold whitespace-nowrap">Apr 15</div>
+                        </div>
+                    </div>
+
+                    <!-- Price Journey Bar -->
+                    <div class="mt-5 pt-5 border-t border-green-pale">
+                        <div class="text-[11px] font-semibold tracking-widest uppercase text-gray-400 mb-3">Price
+                            Journey (per quintal)</div>
+                        <div class="flex rounded-xl overflow-hidden h-8 text-[10px] font-bold text-white">
+                            <div class="flex-[2.5] bg-green-bright flex items-center justify-center">Farmer ₹1,800</div>
+                            <div class="flex-[0.8] bg-kblue flex items-center justify-center">+₹180</div>
+                            <div class="flex-[0.6] bg-purple-500 flex items-center justify-center">+₹160</div>
+                            <div class="flex-[0.9] bg-red-500 flex items-center justify-center">Final ₹2,340</div>
+                        </div>
+                        <div class="flex text-[10px] text-gray-400 mt-1">
+                            <div class="flex-[2.5]">Farm price</div>
+                            <div class="flex-[0.8]">Transport</div>
+                            <div class="flex-[0.6]">Trade margin</div>
+                            <div class="flex-[0.9] text-right">Consumer</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Batches -->
+            <div class="bg-white border border-green-pale rounded-2xl shadow-sm overflow-hidden">
+                <div class="px-5 py-4 border-b border-green-pale flex items-center justify-between">
+                    <div class="font-display text-lg font-semibold">Active Batches</div>
+                    <span class="bg-green-pale text-green-dark text-xs font-semibold px-3 py-1 rounded-full">342
+                        Live</span>
+                </div>
+                <div class="px-5 py-4">
+                    <!-- Filters -->
+                    <div class="flex gap-2 mb-4">
+                        <input type="text" placeholder="Search batch, crop, farmer..."
+                            class="flex-1 min-w-0 border border-green-pale rounded-lg px-3 py-2 text-sm text-gray-700" />
+                        <select
+                            class="border border-green-pale rounded-lg px-2 py-2 text-xs text-gray-600 bg-white cursor-pointer">
+                            <option>All Crops</option>
+                            <option>Rice</option>
+                            <option>Wheat</option>
+                            <option>Maize</option>
+                            <option>Pulses</option>
+                        </select>
+                    </div>
+                    <!-- Batch List -->
+                    <div class="flex flex-col gap-3" id="batch-list">
+
+                        <div class="batch-item selected border-2 border-green-pale rounded-xl p-4 cursor-pointer relative overflow-hidden"
+                            onclick="selectBatch(this,'kt2038')" style="border-left: 4px solid #E8A020;">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-sm font-bold">#KT-2038</span>
+                                <span
+                                    class="bg-kblue-pale text-kblue text-[10px] font-bold px-2 py-0.5 rounded-lg tracking-wide">IN
+                                    TRANSIT</span>
+                            </div>
+                            <div class="text-sm font-semibold mb-1">🌾 Paddy Rice · 3.2T</div>
+                            <div class="text-xs text-gray-400">Raju Prasad · Samastipur → Patna · ETA 2h 10min</div>
+                            <div class="mt-2 h-1 bg-gray-100 rounded-full overflow-hidden">
+                                <div class="batch-progress h-full bg-gradient-to-r from-green-bright to-green-light rounded-full"
+                                    style="width:57%"></div>
+                            </div>
+                        </div>
+
+                        <div class="batch-item border border-green-pale rounded-xl p-4 cursor-pointer relative"
+                            onclick="selectBatch(this,'kt1998')" style="border-left: 4px solid #1A6B9E;">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-sm font-bold">#KT-1998</span>
+                                <span
+                                    class="bg-kblue-pale text-kblue text-[10px] font-bold px-2 py-0.5 rounded-lg tracking-wide">IN
+                                    TRANSIT</span>
+                            </div>
+                            <div class="text-sm font-semibold mb-1">🌿 Wheat · 5.1T</div>
+                            <div class="text-xs text-gray-400">Suresh Kumar · Muzaffarpur → Patna · ETA 3h 20min</div>
+                            <div class="mt-2 h-1 bg-gray-100 rounded-full overflow-hidden">
+                                <div class="batch-progress h-full bg-gradient-to-r from-green-bright to-green-light rounded-full"
+                                    style="width:38%"></div>
+                            </div>
+                        </div>
+
+                        <div class="batch-item border border-green-pale rounded-xl p-4 cursor-pointer relative"
+                            onclick="selectBatch(this,'kt2041')" style="border-left: 4px solid #E8A020;">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-sm font-bold">#KT-2041</span>
+                                <span
+                                    class="bg-amber-pale text-amber text-[10px] font-bold px-2 py-0.5 rounded-lg tracking-wide">IN
+                                    STORAGE</span>
+                            </div>
+                            <div class="text-sm font-semibold mb-1">🌾 Rice · 2.4T</div>
+                            <div class="text-xs text-gray-400">Patna Cold Chain ⚠ Temp alert · Day 3 of 12</div>
+                            <div class="mt-2 h-1 bg-gray-100 rounded-full overflow-hidden">
+                                <div class="batch-progress h-full rounded-full"
+                                    style="width:25%;background:linear-gradient(90deg,#E8A020,#F5CBA7)"></div>
+                            </div>
+                        </div>
+
+                        <div class="batch-item border border-green-pale rounded-xl p-4 cursor-pointer relative"
+                            onclick="selectBatch(this,'kt1924')" style="border-left: 4px solid #2E9E50;">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-sm font-bold">#KT-1924</span>
+                                <span
+                                    class="bg-green-pale text-green-dark text-[10px] font-bold px-2 py-0.5 rounded-lg tracking-wide">DELIVERED</span>
+                            </div>
+                            <div class="text-sm font-semibold mb-1">🌽 Maize · 1.8T</div>
+                            <div class="text-xs text-gray-400">Grade-A Verified · Patna City Market</div>
+                            <div class="mt-2 h-1 bg-gray-100 rounded-full overflow-hidden">
+                                <div class="batch-progress h-full bg-gradient-to-r from-green-bright to-green-light rounded-full"
+                                    style="width:100%"></div>
+                            </div>
+                        </div>
+
+                        <div class="batch-item border border-green-pale rounded-xl p-4 cursor-pointer relative"
+                            onclick="selectBatch(this,'kt1881')" style="border-left: 4px solid #8E44AD;">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-sm font-bold">#KT-1881</span>
+                                <span
+                                    class="bg-purple-100 text-purple-700 text-[10px] font-bold px-2 py-0.5 rounded-lg tracking-wide">VERIFIED</span>
+                            </div>
+                            <div class="text-sm font-semibold mb-1">🫘 Black Gram · 0.9T</div>
+                            <div class="text-xs text-gray-400">Quality lab clearance · Ready to dispatch</div>
+                            <div class="mt-2 h-1 bg-gray-100 rounded-full overflow-hidden">
+                                <div class="batch-progress h-full bg-gradient-to-r from-green-bright to-green-light rounded-full"
+                                    style="width:75%"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAP PANEL -->
+        <div class="bg-white border border-green-pale rounded-2xl shadow-sm overflow-hidden mb-6">
+            <div class="px-6 py-4 border-b border-green-pale flex items-center justify-between">
+                <div class="font-display text-lg font-semibold">Live Route Map — Bihar Region</div>
+                <div class="flex gap-5 text-xs text-gray-400">
+                    <span class="flex items-center gap-1.5"><span
+                            class="inline-block w-3 h-0.5 bg-green-bright rounded"></span>Delivered</span>
+                    <span class="flex items-center gap-1.5"><span
+                            class="inline-block w-3 h-0.5 bg-amber rounded"></span>In Transit</span>
+                    <span class="flex items-center gap-1.5"><span
+                            class="inline-block w-2.5 h-2.5 bg-kblue rounded-full"></span>Warehouse</span>
+                </div>
+            </div>
+            <div class="relative bg-gradient-to-br from-green-50 to-emerald-100" style="height:200px">
+                <svg width="100%" height="200" viewBox="0 0 800 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="800" height="200" fill="#D8EDD8" />
+                    <!-- River Ganga -->
+                    <path d="M0 130 Q200 110 400 120 Q600 130 800 115" stroke="#A8C8E8" stroke-width="6" fill="none"
+                        opacity=".7" />
+                    <path d="M0 135 Q200 115 400 125 Q600 135 800 120" stroke="#C0D8F0" stroke-width="3" fill="none"
+                        opacity=".5" />
+                    <!-- Roads -->
+                    <path d="M80 80 L300 95 L500 88 L720 80" stroke="#E8E0D0" stroke-width="4" fill="none"
+                        opacity=".8" />
+                    <path d="M150 40 L300 95 L400 150" stroke="#E8E0D0" stroke-width="3" fill="none" opacity=".6" />
+                    <path d="M400 95 L550 140 L680 155" stroke="#E8E0D0" stroke-width="3" fill="none" opacity=".6" />
+                    <!-- Active transit route -->
+                    <path d="M300 95 L440 100 L520 98" stroke="#E8A020" stroke-width="3" stroke-dasharray="8 4"
+                        fill="none" />
+                    <!-- Delivered route -->
+                    <path d="M520 98 L650 110" stroke="#2E9E50" stroke-width="3" fill="none" />
+                    <!-- Muzaffarpur route -->
+                    <path d="M150 45 L300 95 L520 98" stroke="#1A6B9E" stroke-width="2.5" stroke-dasharray="6 3"
+                        fill="none" opacity=".7" />
+                    <!-- Location dots -->
+                    <circle cx="300" cy="95" r="7" fill="#2E9E50" stroke="#fff" stroke-width="2" />
+                    <circle cx="150" cy="45" r="6" fill="#1A6B9E" stroke="#fff" stroke-width="2" />
+                    <circle cx="520" cy="98" r="9" fill="#E8A020" stroke="#fff" stroke-width="2" />
+                    <circle cx="650" cy="110" r="7" fill="#2E9E50" stroke="#fff" stroke-width="2" />
+                    <!-- Warehouse marker -->
+                    <rect x="510" y="82" width="20" height="20" rx="4" fill="#1A6B9E" stroke="#fff"
+                        stroke-width="1.5" />
+                    <text x="520" y="96" text-anchor="middle" fill="#fff" font-size="10" font-weight="700">W</text>
+                    <!-- Truck marker -->
+                    <rect x="392" y="85" width="20" height="13" rx="3" fill="#E8A020" stroke="#fff"
+                        stroke-width="1.5" />
+                    <circle cx="395" cy="100" r="3" fill="#333" stroke="#fff" stroke-width="1" />
+                    <circle cx="409" cy="100" r="3" fill="#333" stroke="#fff" stroke-width="1" />
+                    <!-- Labels -->
+                    <text x="300" y="116" text-anchor="middle" fill="#0D4A1E" font-size="11"
+                        font-weight="700">Samastipur</text>
+                    <text x="150" y="36" text-anchor="middle" fill="#154360" font-size="10"
+                        font-weight="600">Muzaffarpur</text>
+                    <text x="520" y="70" text-anchor="middle" fill="#0D4A1E" font-size="12"
+                        font-weight="700">Patna</text>
+                    <text x="650" y="128" text-anchor="middle" fill="#0D4A1E" font-size="10">City Market</text>
+                    <text x="413" y="80" text-anchor="middle" fill="#6D4C00" font-size="9" font-weight="600">NH-77 ·
+                        2h</text>
+                    <text x="14" y="16" fill="#6B7D6B" font-size="10" opacity=".8">Bihar State Supply Network</text>
+                    <text x="790" y="192" text-anchor="end" fill="#6B7D6B" font-size="9" opacity=".5">Schematic · not to
+                        scale</text>
+                </svg>
+            </div>
+        </div>
+
+        <!-- BOTTOM 3-COL GRID -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+            <!-- Price Trend -->
+            <div class="bg-white border border-green-pale rounded-2xl shadow-sm overflow-hidden">
+                <div class="px-5 py-4 border-b border-green-pale flex items-center justify-between">
+                    <div class="font-display text-lg font-semibold">Market Prices</div>
+                    <select
+                        class="border border-green-pale rounded-lg text-xs px-2 py-1.5 bg-white text-gray-600 cursor-pointer">
+                        <option>Rice (per quintal)</option>
+                        <option>Wheat</option>
+                        <option>Maize</option>
+                    </select>
+                </div>
+                <div class="px-5 py-4">
+                    <div class="flex items-baseline gap-2 mb-4">
+                        <span class="text-3xl font-bold">₹2,180</span>
+                        <span class="text-sm text-green-bright font-semibold">▲ 3.4% today</span>
+                    </div>
+                    <!-- Bar chart -->
+                    <div class="flex items-end gap-1.5 h-20 mb-2" id="price-chart">
+                        <div class="bar flex-1 bg-green-bright opacity-70 rounded-t transition-all cursor-pointer"
+                            style="height:55%" title="Mon ₹2,050"></div>
+                        <div class="bar flex-1 bg-green-bright opacity-70 rounded-t transition-all cursor-pointer"
+                            style="height:62%" title="Tue ₹2,090"></div>
+                        <div class="bar flex-1 bg-green-bright opacity-70 rounded-t transition-all cursor-pointer"
+                            style="height:58%" title="Wed ₹2,070"></div>
+                        <div class="bar flex-1 bg-green-bright opacity-70 rounded-t transition-all cursor-pointer"
+                            style="height:70%" title="Thu ₹2,120"></div>
+                        <div class="bar flex-1 bg-green-bright opacity-70 rounded-t transition-all cursor-pointer"
+                            style="height:75%" title="Fri ₹2,150"></div>
+                        <div class="bar flex-1 bg-amber rounded-t transition-all cursor-pointer" style="height:80%"
+                            title="Today ₹2,180"></div>
+                        <div class="bar flex-1 bg-green-bright opacity-30 rounded-t transition-all cursor-pointer"
+                            style="height:83%" title="Proj ₹2,210"></div>
+                    </div>
+                    <div class="flex gap-1.5 text-[10px] text-gray-400">
+                        <span class="flex-1 text-center">Mon</span>
+                        <span class="flex-1 text-center">Tue</span>
+                        <span class="flex-1 text-center">Wed</span>
+                        <span class="flex-1 text-center">Thu</span>
+                        <span class="flex-1 text-center">Fri</span>
+                        <span class="flex-1 text-center font-semibold text-amber">Today</span>
+                        <span class="flex-1 text-center">Proj</span>
+                    </div>
+                    <div class="mt-3 text-xs text-gray-400">
+                        Farmer receives: <strong class="text-gray-800">₹1,800</strong> · Market spread: <strong
+                            class="text-red-500">₹380</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quality Overview -->
+            <div class="bg-white border border-green-pale rounded-2xl shadow-sm overflow-hidden">
+                <div class="px-5 py-4 border-b border-green-pale flex items-center justify-between">
+                    <div class="font-display text-lg font-semibold">Quality Overview</div>
+                    <span class="bg-green-pale text-green-dark text-xs font-semibold px-3 py-1 rounded-full">This
+                        Week</span>
+                </div>
+                <div class="px-5 py-4">
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div class="border border-green-pale rounded-xl p-3 text-center">
+                            <div class="text-2xl font-bold text-green-bright mb-1">96.1%</div>
+                            <div class="text-[11px] text-gray-400 tracking-wide">Pass Rate</div>
+                            <div class="mt-2 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                <div class="h-full bg-green-bright rounded-full" style="width:96%"></div>
+                            </div>
+                        </div>
+                        <div class="border border-green-pale rounded-xl p-3 text-center">
+                            <div class="text-2xl font-bold text-amber mb-1">13.2%</div>
+                            <div class="text-[11px] text-gray-400 tracking-wide">Avg Moisture</div>
+                            <div class="mt-2 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                <div class="h-full bg-amber rounded-full" style="width:44%"></div>
+                            </div>
+                        </div>
+                        <div class="border border-green-pale rounded-xl p-3 text-center">
+                            <div class="text-2xl font-bold text-kblue mb-1">0.8%</div>
+                            <div class="text-[11px] text-gray-400 tracking-wide">Pesticide Flag</div>
+                            <div class="mt-2 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                <div class="h-full bg-kblue rounded-full" style="width:8%"></div>
+                            </div>
+                        </div>
+                        <div class="border border-green-pale rounded-xl p-3 text-center">
+                            <div class="text-2xl font-bold text-purple-500 mb-1">72%</div>
+                            <div class="text-[11px] text-gray-400 tracking-wide">Grade A Crops</div>
+                            <div class="mt-2 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                <div class="h-full bg-purple-500 rounded-full" style="width:72%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-green-pale rounded-xl p-3 text-sm text-green-dark">
+                        <strong>🏆 Top District:</strong> Vaishali — 98.4% pass rate this week across 124 batches.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions + Weather -->
+            <div class="bg-white border border-green-pale rounded-2xl shadow-sm overflow-hidden">
+                <div class="px-5 py-4 border-b border-green-pale">
+                    <div class="font-display text-lg font-semibold">Quick Actions</div>
+                </div>
+                <div class="px-5 py-4">
+                    <!-- QR Scanner Zone -->
+                    <div onclick="openScan()" id="scan-zone"
+                        class="scan-zone border-2 border-dashed border-green-pale rounded-2xl p-5 text-center cursor-pointer mb-4">
+                        <div class="text-3xl mb-2">⬛</div>
+                        <div class="text-sm font-semibold mb-1">Scan Crop QR Code</div>
+                        <div class="text-xs text-gray-400">Tap to scan batch label or enter ID</div>
+                        <!-- Mini QR visual -->
+                        <div class="grid grid-cols-5 gap-0.5 mt-3 mx-auto w-fit opacity-30">
+                            <div class="w-3.5 h-3.5 bg-green-dark rounded-sm"></div>
+                            <div class="w-3.5 h-3.5 bg-gray-200 rounded-sm"></div>
+                            <div class="w-3.5 h-3.5 bg-green-dark rounded-sm"></div>
+                            <div class="w-3.5 h-3.5 bg-green-dark rounded-sm"></div>
+                            <div class="w-3.5 h-3.5 bg-gray-200 rounded-sm"></div>
+                            <div class="w-3.5 h-3.5 bg-gray-200 rounded-sm"></div>
+                            <div class="w-3.5 h-3.5 bg-green-dark rounded-sm"></div>
+                            <div class="w-3.5 h-3.5 bg-gray-200 rounded-sm"></div>
+                            <div class="w-3.5 h-3.5 bg-gray-200 rounded-sm"></div>
+                            <div class="w-3.5 h-3.5 bg-green-dark rounded-sm"></div>
+                            <div class="w-3.5 h-3.5 bg-green-dark rounded-sm"></div>
+                            <div class="w-3.5 h-3.5 bg-gray-200 rounded-sm"></div>
+                            <div class="w-3.5 h-3.5 bg-green-dark rounded-sm"></div>
+                            <div class="w-3.5 h-3.5 bg-gray-200 rounded-sm"></div>
+                            <div class="w-3.5 h-3.5 bg-green-dark rounded-sm"></div>
+                        </div>
+                    </div>
+
+                    <!-- Weather -->
+                    <div class="text-[11px] font-semibold text-gray-400 tracking-widest uppercase mb-3">Weather — Patna
+                        Region</div>
+                    <div class="flex flex-col divide-y divide-green-pale">
+                        <div class="flex items-center gap-3 py-2">
+                            <span class="text-xs text-gray-400 w-10">Today</span>
+                            <span>☀</span>
+                            <div class="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full"
+                                    style="width:82%;background:linear-gradient(90deg,#3B8BD4,#E8A020)"></div>
+                            </div>
+                            <span class="text-sm font-semibold w-10 text-right">36°C</span>
+                        </div>
+                        <div class="flex items-center gap-3 py-2">
+                            <span class="text-xs text-gray-400 w-10">Sat</span>
+                            <span>⛅</span>
+                            <div class="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full"
+                                    style="width:60%;background:linear-gradient(90deg,#3B8BD4,#E8A020)"></div>
+                            </div>
+                            <span class="text-sm font-semibold w-10 text-right">33°C</span>
+                        </div>
+                        <div class="flex items-center gap-3 py-2">
+                            <span class="text-xs text-gray-400 w-10">Sun</span>
+                            <span>🌧</span>
+                            <div class="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full"
+                                    style="width:35%;background:linear-gradient(90deg,#3B8BD4,#E8A020)"></div>
+                            </div>
+                            <span class="text-sm font-semibold w-10 text-right">28°C</span>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex gap-2 mt-4">
+                        <button onclick="alert('Generating weekly crop quality report...')"
+                            class="flex-1 bg-green-dark hover:bg-green-mid text-white text-xs font-medium py-2 rounded-xl transition-colors">
+                            Export Report
+                        </button>
+                        <button onclick="alert('Add Farmer form coming soon!')"
+                            class="flex-1 bg-kblue hover:opacity-90 text-white text-xs font-medium py-2 rounded-xl transition-colors">
+                            Add Farmer
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="protected-dashboard.js"></script>
 
 </body>
+
 </html>
