@@ -14,7 +14,7 @@ const EXPECTED_AUDIENCE = "59621db6-6a59-43ec-8ce3-0a56d459f0db";
 const FIREBASE_DB_URL = "https://lithe-transport-492814-r5-default-rtdb.europe-west1.firebasedatabase.app";
 const LOCALHOST_URI_PATTERN = /localhost|127\.0\.0\.1/i;
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 10000;
 
 app.use(session({
 	secret: "123456",
@@ -137,11 +137,18 @@ function getAppIDConfig() {
 	const productionRedirectUri = resolveProductionRedirectUri();
 
 	if (process.env.APPID_SERVICE_BINDING) {
-		config = JSON.parse(process.env.APPID_SERVICE_BINDING);
+		try {
+			config = JSON.parse(process.env.APPID_SERVICE_BINDING);
+		} catch (error) {
+			console.warn("APPID_SERVICE_BINDING is not valid JSON. Falling back to local configuration.");
+			config = null;
+		}
 	} else if (process.env["VCAP_APPLICATION"]) {
 		let vcapApplication = JSON.parse(process.env["VCAP_APPLICATION"]);
 		config = { "redirectUri": "https://" + vcapApplication["application_uris"][0] + CALLBACK_URL };
-	} else {
+	}
+
+	if (!config) {
 		try {
 			// local fallback when service binding env is not present
 			config = require('./localdev-config.json');
