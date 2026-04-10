@@ -22,7 +22,7 @@ const app = express();
 
 const CALLBACK_URL = "/ibm/cloud/appid/callback";
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 10000;
 
 // Setup express application to use express-session middleware
 // Must be configured with proper session storage for production
