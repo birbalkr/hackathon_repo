@@ -1,15 +1,4 @@
-/*
- Copyright 2019 IBM Corp.
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
- http://www.apache.org/licenses/LICENSE-2.0
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
- */
+
 
 const express = require("express");
 const session = require("express-session");
@@ -22,12 +11,8 @@ const app = express();
 
 const CALLBACK_URL = "/ibm/cloud/appid/callback";
 
-const port = process.env.PORT || 10000;
+const port =  3000;
 
-// Setup express application to use express-session middleware
-// Must be configured with proper session storage for production
-// environments. See https://github.com/expressjs/session for
-// additional documentation
 app.use(session({
 	secret: "123456",
 	resave: true,
@@ -42,17 +27,10 @@ app.use(passport.session());
 let webAppStrategy = new WebAppStrategy(getAppIDConfig());
 passport.use(webAppStrategy);
 
-// Configure passportjs with user serialization/deserialization. This is required
-// for authenticated session persistence accross HTTP requests. See passportjs docs
-// for additional information http://passportjs.org/docs
 passport.serializeUser((user, cb) => cb(null, user));
 passport.deserializeUser((obj, cb) => cb(null, obj));
 
-// Callback to finish the authorization process. Will retrieve access and identity tokens/
-// from AppID service and redirect to either (in below order)
-// 1. the original URL of the request that triggered authentication, as persisted in HTTP session under WebAppStrategy.ORIGINAL_URL key.
-// 2. successRedirect as specified in passport.authenticate(name, {successRedirect: "...."}) invocation
-// 3. application root ("/")
+
 app.get(CALLBACK_URL, passport.authenticate(WebAppStrategy.STRATEGY_NAME, { failureRedirect: '/error', session: false }));
 
 // Protect everything under /protected
