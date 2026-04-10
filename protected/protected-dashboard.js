@@ -309,6 +309,27 @@ function updateIdentityUI(userName, connectionText) {
   }
 }
 
+function setDashboardLoading(message) {
+  const loader = document.getElementById('dashboardLoader');
+  const loaderText = document.getElementById('dashboardLoaderText');
+
+  if (loaderText && message) {
+    loaderText.textContent = message;
+  }
+
+  if (loader) {
+    loader.classList.remove('is-hidden');
+  }
+}
+
+function hideDashboardLoading() {
+  const loader = document.getElementById('dashboardLoader');
+
+  if (loader) {
+    loader.classList.add('is-hidden');
+  }
+}
+
 function normalizeFarmerRecord(record, fallbackIndex) {
   if (!record || typeof record !== 'object') {
     return null;
@@ -515,6 +536,7 @@ function applyFarmerData(sourceLabel) {
 async function initFirebaseDashboard() {
   const fallbackName = 'Signed-in user';
   window.__dashboardIdentity = null;
+  setDashboardLoading('Fetching Firebase records...');
 
   try {
     const payloadResponse = await fetch('/protected/api/idPayload', { credentials: 'same-origin' });
@@ -550,9 +572,11 @@ async function initFirebaseDashboard() {
         const userLabel = getUserDisplayName(window.__dashboardIdentity) || fallbackName;
         applyFarmerData('Firebase live data synced');
         updateIdentityUI(userLabel, `Firebase live data synced · ${userAccounts.length} users`);
+        hideDashboardLoading();
       },
       () => {
         applyFarmerData('Firebase error · no records loaded');
+        hideDashboardLoading();
       },
     );
 
@@ -562,15 +586,18 @@ async function initFirebaseDashboard() {
       (snapshot) => {
         audienceUsersRaw = snapshot.val() || {};
         applyFarmerData('Firebase user directory synced');
+        hideDashboardLoading();
       },
       () => {
         applyFarmerData('Firebase user directory unavailable');
+        hideDashboardLoading();
       },
     );
   } catch (error) {
     window.__dashboardIdentity = null;
     applyFarmerData('Firebase unavailable · no records loaded');
     updateIdentityUI(fallbackName, 'Firebase unavailable · no records loaded');
+    hideDashboardLoading();
   }
 }
 
