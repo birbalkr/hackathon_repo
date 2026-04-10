@@ -205,6 +205,7 @@ let recordsByUser = {};
 let audienceUsersRaw = {};
 let audienceObjectsRaw = {};
 let localCreatedRecordsByTrack = {};
+let firebaseInitPromise = null;
 
 const defaultFarmerTrackingData = [];
 
@@ -601,6 +602,19 @@ async function initFirebaseDashboard() {
   }
 }
 
+function waitForFirebaseReady(timeoutMs) {
+  if (!firebaseInitPromise) {
+    return Promise.resolve();
+  }
+
+  return Promise.race([
+    firebaseInitPromise.catch(() => undefined),
+    new Promise((resolve) => {
+      setTimeout(resolve, timeoutMs || 2500);
+    }),
+  ]);
+}
+
 function renderHistory(items) {
   const list = document.getElementById('historyList');
   if (!list) return;
@@ -720,6 +734,22 @@ function selectUserBySub(sub) {
   renderHistory(historyRows);
 
   renderJourneyStagesForRecord(latest);
+  updateMapRouteText(latest);
+}
+
+function updateMapRouteText(record) {
+  const mapRouteText = document.getElementById('mapRouteText');
+  if (!mapRouteText) return;
+
+  if (!record) {
+    mapRouteText.textContent = 'From: Not selected -> To: Not selected';
+    return;
+  }
+
+  const fromAddress = record.address || record.village || 'Unknown address';
+  const toAddress =
+    record.delivery_address || record.deliveryAddress || record.destination || 'Unknown destination';
+  mapRouteText.textContent = `From: ${fromAddress} -> To: ${toAddress}`;
 }
 
 function selectFarmerByIndex(index) {
@@ -745,6 +775,7 @@ function setupFarmerPanel() {
     if (trackStatus) trackStatus.textContent = 'Pending';
     if (cropImage) cropImage.src = 'https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=900&q=60';
     renderHistory([]);
+    updateMapRouteText(null);
     return;
   }
 
@@ -997,17 +1028,31 @@ function setupScannerPanel() {
       status: record.status,
     });
 
-  const toQrDataUrl = async (text) => {
+  const toQrDataUrl = async (text, format) => {
     await ensureQrLibs();
+    const normalizedFormat = String(format || 'png').toLowerCase();
+    const isJpg = normalizedFormat === 'jpg' || normalizedFormat === 'jpeg';
+
     if (!window.QRCode || typeof window.QRCode.toDataURL !== 'function') {
       const encoded = encodeURIComponent(text);
-      return `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encoded}`;
+      const apiFormat = isJpg ? 'jpg' : 'png';
+      return `https://api.qrserver.com/v1/create-qr-code/?size=220x220&format=${apiFormat}&data=${encoded}`;
     }
 
     return new Promise((resolve, reject) => {
+      const options = {
+        width: 220,
+        margin: 1,
+        color: { dark: '#1a6b2e', light: '#ffffff' },
+      };
+      if (isJpg) {
+        options.type = 'image/jpeg';
+        options.rendererOpts = { quality: 0.92 };
+      }
+
       window.QRCode.toDataURL(
         text,
-        { width: 220, margin: 1, color: { dark: '#1a6b2e', light: '#ffffff' } },
+        options,
         (error, url) => {
           if (error) {
             reject(error);
@@ -1028,8 +1073,11 @@ function setupScannerPanel() {
     }
 
     try {
-      const qrUrl = await toQrDataUrl(createQrPayload(record));
-      if (!qrUrl) {
+      const payload = createQrPayload(record);
+      const qrPngUrl = await toQrDataUrl(payload, 'png');
+      const qrJpgUrl = await toQrDataUrl(payload, 'jpg');
+      const qrPreviewUrl = qrPngUrl || qrJpgUrl;
+      if (!qrPreviewUrl) {
         return;
       }
 
@@ -1040,8 +1088,11 @@ function setupScannerPanel() {
         <div class="qr-readout">${text.replace(/\n/g, '<br>')}</div>
         ${source}
         <div class="qr-generated-wrap">
-          <img src="${qrUrl}" alt="Generated QR code" class="qr-generated-img" />
-          <a class="qr-download-link" href="${qrUrl}" download="${record.trackid || 'tracking-id'}.png">Download QR Code</a>
+          <img src="${qrPreviewUrl}" alt="Generated QR code" class="qr-generated-img" />
+          <div class="qr-download-links">
+            <a class="qr-download-link" href="${qrPngUrl || qrPreviewUrl}" download="${record.trackid || 'tracking-id'}.png">Download PNG</a>
+            <a class="qr-download-link" href="${qrJpgUrl || qrPreviewUrl}" download="${record.trackid || 'tracking-id'}.jpg">Download JPG</a>
+          </div>
         </div>
       `);
     } catch (error) {
@@ -1053,19 +1104,36 @@ function setupScannerPanel() {
     try {
       const parsed = JSON.parse(decodedText);
       if (parsed && parsed.trackid) {
-        return String(parsed.trackid).trim();
+        return normalizeTrackId(parsed.trackid);
       }
     } catch (error) {
       // ignore JSON parse errors and fallback to regex extraction
     }
 
-    const match = decodedText.match(/TRK-\d+/i);
-    return match ? match[0].toUpperCase() : '';
+    return normalizeTrackId(decodedText);
   };
 
   const getTrackIdFromFileName = (fileName) => {
-    const match = String(fileName || '').match(/TRK-\d+/i);
-    return match ? match[0].toUpperCase() : '';
+    return normalizeTrackId(fileName);
+  };
+
+  const normalizeTrackId = (value) => {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+
+    // Allow filenames/paths like uploads/TRK-1234.png and scan text like QR:TRK-1234
+    const withoutPrefix = raw.replace(/^QR\s*:\s*/i, '');
+    const onlyName = withoutPrefix.split(/[\\/]/).pop() || withoutPrefix;
+    const withoutQuery = onlyName.split('?')[0].split('#')[0];
+    const withoutExt = withoutQuery.replace(/\.[a-z0-9]+$/i, '');
+    const compact = withoutExt.replace(/\s+/g, '');
+
+    const canonicalMatch = compact.match(/TRK[-_ ]?(\d{3,})/i);
+    if (canonicalMatch) {
+      return `TRK-${canonicalMatch[1]}`;
+    }
+
+    return '';
   };
 
   const parseDecodedRecord = (decodedText) => {
@@ -1136,6 +1204,38 @@ function setupScannerPanel() {
     return localCreatedRecordsByTrack[String(trackId).toUpperCase()] || null;
   };
 
+  const findRecordByTrackIdAsync = async (trackId) => {
+    await waitForFirebaseReady(2500);
+
+    const local = findRecordByTrackId(trackId);
+    if (local) return local;
+
+    if (!trackId || !window.firebase || !window.firebase.database) {
+      return null;
+    }
+
+    try {
+      const audience = getAudience(window.__dashboardIdentity);
+      const snapshot = await window.firebase.database().ref(`${audience}/objects`).once('value');
+      const freshObjects = snapshot.val() || {};
+      const freshByUser = extractFarmerRecordsFromAudienceObjects(freshObjects);
+      const freshRecords = Object.values(freshByUser).flat();
+      const matched =
+        freshRecords.find(
+          (item) => String(item.trackid || '').toLowerCase() === String(trackId).toLowerCase(),
+        ) || null;
+
+      if (matched) {
+        audienceObjectsRaw = freshObjects;
+        applyFarmerData('Firebase live data synced');
+      }
+
+      return matched;
+    } catch (error) {
+      return null;
+    }
+  };
+
   const decodeQrFromFile = async (file) => {
     await ensureQrLibs();
     if (!window.jsQR) {
@@ -1186,22 +1286,23 @@ function setupScannerPanel() {
     return nextId;
   };
 
-  const processScan = () => {
+  const processScan = async () => {
     const rawValue = scanInput.value.trim();
     if (!rawValue) {
       setQrText('Please enter QR text or track ID.');
       return null;
     }
 
-    const normalized = rawValue.replace(/^QR:/i, '');
-    const found = findRecordByTrackId(normalized);
+    const normalized = normalizeTrackId(rawValue) || rawValue.replace(/^QR:/i, '').trim();
+    const found = await findRecordByTrackIdAsync(normalized);
 
     if (!found) {
       setQrText(`No data found for: ${normalized}`);
       return null;
     }
 
-    showRecordData(found, false);
+    await showRecordData(found, true);
+    updateMapRouteText(found);
 
     const owner = Object.entries(recordsByUser).find(([, records]) =>
       records.some((x) => x.trackid.toLowerCase() === found.trackid.toLowerCase()),
@@ -1232,6 +1333,16 @@ function setupScannerPanel() {
     if (!file) return;
 
     try {
+      const fallbackTrackFromName = getTrackIdFromFileName(file.name);
+      if (fallbackTrackFromName) {
+        scanInput.value = fallbackTrackFromName;
+        const foundByNameFirst = await processScan();
+        if (foundByNameFirst) {
+          setQrText(`${formatRecordText(foundByNameFirst)}\n${formatTrackingDetails(foundByNameFirst)}\n\nMatched by file name track ID.`);
+          return;
+        }
+      }
+
       setQrText('Reading QR image...');
       const decodedText = await decodeQrFromFile(file);
       const trackId = getTrackIdFromDecodedText(decodedText) || getTrackIdFromFileName(file.name);
@@ -1241,9 +1352,10 @@ function setupScannerPanel() {
         scanInput.value = trackId;
       }
 
-      const found = trackId ? findRecordByTrackId(trackId) : null;
+      const found = trackId ? await findRecordByTrackIdAsync(trackId) : null;
       if (found) {
         await showRecordData(found, false, decodedText);
+        updateMapRouteText(found);
         const owner = Object.entries(recordsByUser).find(([, records]) =>
           records.some((x) => String(x.trackid || '').toLowerCase() === String(found.trackid || '').toLowerCase()),
         );
@@ -1255,6 +1367,7 @@ function setupScannerPanel() {
 
       if (parsedRecord) {
         setQrText(`${formatRecordText(parsedRecord)}\n${formatTrackingDetails(parsedRecord)}\n\nSource: Uploaded QR (not linked in current tracking DB)`);
+        updateMapRouteText(parsedRecord);
         return;
       }
 
@@ -1263,7 +1376,7 @@ function setupScannerPanel() {
       const fallbackTrackFromName = getTrackIdFromFileName(file.name);
       if (fallbackTrackFromName) {
         scanInput.value = fallbackTrackFromName;
-        const foundByName = processScan();
+        const foundByName = await processScan();
         if (foundByName) {
           setQrText(`${formatRecordText(foundByName)}\n${formatTrackingDetails(foundByName)}\n\nNote: QR decode failed, matched by file name track ID.`);
           return;
@@ -1378,7 +1491,9 @@ function setupScannerPanel() {
     openCreateTrackModal(generateTrackId());
   };
 
-  scanBtn.addEventListener('click', processScan);
+  scanBtn.addEventListener('click', async () => {
+    await processScan();
+  });
 
   if (createTrackBtn) {
     createTrackBtn.addEventListener('click', () => {
@@ -1389,7 +1504,7 @@ function setupScannerPanel() {
   scanInput.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
       event.preventDefault();
-      processScan();
+      void processScan();
     }
   });
 }
@@ -1399,7 +1514,7 @@ setupScannerPanel();
 setupJourneyUpdater();
 ensureUserBadge();
 ensureWelcomeBanner();
-initFirebaseDashboard();
+firebaseInitPromise = initFirebaseDashboard();
 
 window.setTab = setTab;
 window.filterSH = filterSH;

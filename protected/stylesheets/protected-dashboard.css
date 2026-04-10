@@ -81,6 +81,14 @@ body {
     font-size: 15px !important;
 }
 
+.quick-qr-title {
+    font-size: 15px !important;
+}
+
+.quick-actions-title {
+    font-size: 15px !important;
+}
+
 .stage-line::after {
     content: '';
     position: absolute;
@@ -609,6 +617,12 @@ input[type=text]:focus {
     text-decoration: none;
     border-radius: 8px;
     padding: 8px 10px;
+}
+
+.qr-download-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .qr-download-link:hover {
