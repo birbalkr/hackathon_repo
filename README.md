@@ -183,6 +183,28 @@ npm install
 npm run dev
 ```
 
+## 🔥 Firebase Realtime Database Setup
+
+The protected dashboard now fetches live records from Firebase Realtime Database:
+
+1. Create a Realtime Database in your Firebase project (start in test mode for development).
+2. Confirm your Realtime Database URL in [config.js](config.js) and [public/stylesheets/realtime-db.js](public/stylesheets/realtime-db.js).
+3. Set Firebase Realtime Database rules for development:
+
+```json
+{
+  "rules": {
+    ".read": true,
+    ".write": true
+  }
+}
+```
+
+4. Start the app and login with IBM App ID.
+5. Open `/protected/protected.html` to view live crop updates fetched from Realtime Database.
+
+Before production, lock down rules to authenticated users only.
+
 ---
 
 ## 🌍 How to Use
