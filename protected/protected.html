@@ -111,7 +111,10 @@
                     <div class="scanner-left">
                         <div class="history-head">Scan QR / Track ID</div>
                         <input id="scanInput" class="scan-input" type="text" placeholder="Example: TRK-2041 or QR:TRK-2041">
-                        <button id="scanBtn" class="scan-btn" type="button">Scan</button>
+                        <div class="scan-actions">
+                            <button id="createTrackBtn" class="scan-btn create-track-btn" type="button">+ Create Track ID</button>
+                            <button id="scanBtn" class="scan-btn" type="button">Scan</button>
+                        </div>
                     </div>
                     <div class="scanner-right">
                         <div class="history-head">QR Data</div>
@@ -244,13 +247,19 @@
                         <div class="text-xs text-gray-400 mt-0.5" id="batch-subtitle">Batch #KT-2038 · Paddy Rice ·
                             Samastipur</div>
                     </div>
-                    <select onchange="switchBatch(this.value)"
-                        class="text-xs border border-green-pale rounded-lg px-3 py-2 bg-white text-gray-700 cursor-pointer">
-                        <option value="kt2038">KT-2038 Paddy</option>
-                        <option value="kt1998">KT-1998 Wheat</option>
-                        <option value="kt1924">KT-1924 Maize</option>
-                        <option value="kt2041">KT-2041 Rice</option>
-                    </select>
+                    <div class="flex items-center gap-2">
+                        <button id="journeyUpdateBtn" type="button"
+                            class="text-xs bg-green-dark hover:bg-green-mid text-white px-3 py-2 rounded-lg transition-colors">
+                            + Update Journey
+                        </button>
+                        <select onchange="switchBatch(this.value)"
+                            class="text-xs border border-green-pale rounded-lg px-3 py-2 bg-white text-gray-700 cursor-pointer">
+                            <option value="kt2038">KT-2038 Paddy</option>
+                            <option value="kt1998">KT-1998 Wheat</option>
+                            <option value="kt1924">KT-1924 Maize</option>
+                            <option value="kt2041">KT-2041 Rice</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="px-6 py-5">
                     <!-- Journey Stages -->
@@ -365,6 +374,13 @@
                                     class="inline-block bg-gray-100 text-gray-400 text-[10px] font-semibold px-2 py-0.5 rounded-md mt-1 tracking-wide">Upcoming</span>
                             </div>
                             <div class="text-xs text-gray-300 font-semibold whitespace-nowrap">Apr 15</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <div class="text-[11px] font-semibold tracking-widest uppercase text-gray-400 mb-2">Proof Images</div>
+                        <div id="journeyProofGallery" class="journey-proof-gallery">
+                            <div class="journey-proof-empty">No proof images uploaded yet.</div>
                         </div>
                     </div>
 
