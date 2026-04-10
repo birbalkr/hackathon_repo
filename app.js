@@ -12,6 +12,7 @@ const app = express();
 const CALLBACK_URL = "/ibm/cloud/appid/callback";
 const EXPECTED_AUDIENCE = "59621db6-6a59-43ec-8ce3-0a56d459f0db";
 const FIREBASE_DB_URL = "https://lithe-transport-492814-r5-default-rtdb.europe-west1.firebasedatabase.app";
+const LOCALHOST_URI_PATTERN = /localhost|127\.0\.0\.1/i;
 
 const port = process.env.PORT || 3000;
 
@@ -26,7 +27,9 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-let webAppStrategy = new WebAppStrategy(getAppIDConfig());
+const appIdConfig = getAppIDConfig();
+validateAppIdRedirectUri(appIdConfig);
+let webAppStrategy = new WebAppStrategy(appIdConfig);
 passport.use(webAppStrategy);
 
 passport.serializeUser((user, cb) => cb(null, user));
@@ -113,7 +116,15 @@ app.post("/protected/api/bootstrap-user", async (req, res) => {
 });
 
 app.get('/error', (req, res) => {
-	res.send('Authentication Error');
+	const activeRedirectUri = (appIdConfig && appIdConfig.redirectUri) || "(not configured)";
+	res.status(401).send(
+		`Authentication Error\n\nActive redirect URI: ${activeRedirectUri}\n\nRegister this exact URI in IBM App ID -> Manage Authentication -> Authentication Settings -> Web redirect URLs.`,
+	);
+});
+
+app.get('/appid-runtime', (req, res) => {
+	const safe = getSafeAppIdRuntime();
+	res.json(safe);
 });
 
 app.listen(port, () => {
@@ -151,6 +162,44 @@ function getAppIDConfig() {
 	}
 
 	return resolved;
+}
+
+function validateAppIdRedirectUri(config) {
+	if (!config || !config.redirectUri) {
+		console.warn("App ID redirect URI is missing. Set APPID_REDIRECT_URI or APP_BASE_URL.");
+		return;
+	}
+
+	if (process.env.NODE_ENV === "production" && LOCALHOST_URI_PATTERN.test(config.redirectUri)) {
+		throw new Error(
+			`Invalid App ID redirect URI for production: ${config.redirectUri}. Set APPID_REDIRECT_URI to your Render callback URL.`,
+		);
+	}
+}
+
+function getSafeAppIdRuntime() {
+	const oauthServerUrl = (appIdConfig && appIdConfig.oauthServerUrl) || null;
+	const tenantFromUrl = extractTenantFromOauthUrl(oauthServerUrl);
+
+	return {
+		nodeEnv: process.env.NODE_ENV || "(unset)",
+		activeRedirectUri: (appIdConfig && appIdConfig.redirectUri) || null,
+		clientId: (appIdConfig && appIdConfig.clientId) || null,
+		tenantId: (appIdConfig && appIdConfig.tenantId) || tenantFromUrl,
+		oauthServerUrl,
+		appBaseUrlEnv: process.env.APP_BASE_URL || null,
+		publicUrlEnv: process.env.PUBLIC_URL || null,
+		renderExternalUrlEnv: process.env.RENDER_EXTERNAL_URL || null,
+		renderServiceNameEnv: process.env.RENDER_SERVICE_NAME || null,
+		hasAppIdServiceBinding: Boolean(process.env.APPID_SERVICE_BINDING),
+	};
+}
+
+function extractTenantFromOauthUrl(url) {
+	if (!url) return null;
+	const parts = String(url).split('/oauth/v4/');
+	if (parts.length < 2) return null;
+	return parts[1] || null;
 }
 
 function withResolvedRedirectUri(config) {
