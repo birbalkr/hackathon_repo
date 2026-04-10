@@ -1,2 +1,8 @@
-localdev-config.json
+node_modules
+npm-debug.log
+.git
+.gitignore
+.env
+*.log
+README.mdlocaldev-config.json
 manifest.yml

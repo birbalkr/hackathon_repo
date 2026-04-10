@@ -121,21 +121,51 @@ app.listen(port, () => {
 });
 
 function getAppIDConfig() {
-	let config;
+	let config = null;
 
-	try {
-		// if running locally we'll have the local config file
-		config = require('./localdev-config.json');
-	} catch (e) {
-		if (process.env.APPID_SERVICE_BINDING) { // if running on Kubernetes this env variable would be defined
-			config = JSON.parse(process.env.APPID_SERVICE_BINDING);
+	if (process.env.APPID_SERVICE_BINDING) {
+		config = JSON.parse(process.env.APPID_SERVICE_BINDING);
+		if (process.env.redirectUri) {
 			config.redirectUri = process.env.redirectUri;
-		} else { // running on CF
-			let vcapApplication = JSON.parse(process.env["VCAP_APPLICATION"]);
-			return { "redirectUri": "https://" + vcapApplication["application_uris"][0] + CALLBACK_URL };
+		}
+	} else {
+		try {
+			// local fallback when service binding env is not present
+			config = require('./localdev-config.json');
+		} catch (e) {
+			if (process.env["VCAP_APPLICATION"]) {
+				let vcapApplication = JSON.parse(process.env["VCAP_APPLICATION"]);
+				config = { "redirectUri": "https://" + vcapApplication["application_uris"][0] + CALLBACK_URL };
+			}
 		}
 	}
-	return config;
+
+	const resolved = withResolvedRedirectUri(config);
+	if (resolved && resolved.redirectUri) {
+		console.log("App ID redirect URI:", resolved.redirectUri);
+	}
+
+	return resolved;
+}
+
+function withResolvedRedirectUri(config) {
+	if (!config || typeof config !== "object") {
+		return config;
+	}
+
+	const resolved = { ...config };
+	const baseUrl =
+		process.env.APP_BASE_URL ||
+		process.env.PUBLIC_URL ||
+		process.env.RENDER_EXTERNAL_URL ||
+		(process.env.RENDER_SERVICE_NAME ? `https://${process.env.RENDER_SERVICE_NAME}.onrender.com` : "") ||
+		"";
+
+	if (baseUrl) {
+		resolved.redirectUri = `${baseUrl.replace(/\/$/, "")}${CALLBACK_URL}`;
+	}
+
+	return resolved;
 }
 
 function getIdentityPayload(req) {

@@ -1,5 +1,24 @@
 body {
     font-family: 'DM Sans', sans-serif;
+    background:
+        radial-gradient(1200px 420px at 8% -10%, rgba(93, 196, 122, 0.20), transparent 55%),
+        radial-gradient(900px 360px at 100% 0%, rgba(46, 158, 80, 0.16), transparent 60%),
+        linear-gradient(180deg, #0f1e17 0%, #14251c 55%, #1a2c22 100%);
+    color: #e6efe9;
+    min-height: 100vh;
+    font-size: 15px;
+}
+
+.text-\[11px\] {
+    font-size: 15px !important;
+}
+
+.text-xs {
+    font-size: 15px !important;
+}
+
+.text-sm {
+    font-size: 15px !important;
 }
 
 .stage-line::after {

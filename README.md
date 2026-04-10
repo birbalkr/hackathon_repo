@@ -2,7 +2,6 @@
 
 A **web-based crop traceability system** that connects farmers, transporters, warehouses, intermediaries, and retailers on a unified digital platform.
 
-
 ## 🌐 Project Type
 
 💻 **Platform**: Web Application
@@ -188,7 +187,7 @@ npm run dev
 The protected dashboard now fetches live records from Firebase Realtime Database:
 
 1. Create a Realtime Database in your Firebase project (start in test mode for development).
-2. Confirm your Realtime Database URL in [config.js](config.js) and [public/stylesheets/realtime-db.js](public/stylesheets/realtime-db.js).
+2. Confirm your Realtime Database URL in [localdev-config.json](localdev-config.json) and the Firebase setup inside `app.js`.
 3. Set Firebase Realtime Database rules for development:
 
 ```json
@@ -200,10 +199,41 @@ The protected dashboard now fetches live records from Firebase Realtime Database
 }
 ```
 
-4. Start the app and login with IBM App ID.
-5. Open `/protected/protected.html` to view live crop updates fetched from Realtime Database.
+1. Start the app and login with IBM App ID.
+2. Open `/protected/protected.html` to view live crop updates fetched from Realtime Database.
 
 Before production, lock down rules to authenticated users only.
+
+## ☁️ Render Deployment (IBM App ID Fix)
+
+If login redirects to `/error` after deployment, your callback is still using localhost.
+
+Set one of these environment variables in Render:
+
+* `APP_BASE_URL=https://your-service-name.onrender.com`
+* or `PUBLIC_URL=https://your-service-name.onrender.com`
+
+The server automatically builds App ID callback as:
+
+* `https://your-service-name.onrender.com/ibm/cloud/appid/callback`
+
+Also add the same callback URL in IBM App ID allowed redirect URLs.
+
+## 🐳 Render Deployment with Docker
+
+Use these settings in Render when deploying from the Dockerfile:
+
+1. Create a new **Web Service** and choose **Docker** as the environment.
+2. Connect the GitHub repository.
+3. Leave the Dockerfile path as `Dockerfile`.
+4. Set environment variables:
+   * `APP_BASE_URL=https://your-service-name.onrender.com`
+   * `NODE_ENV=production`
+5. Make sure IBM App ID allows this redirect URL:
+   * `https://your-service-name.onrender.com/ibm/cloud/appid/callback`
+6. Deploy and open the Render URL.
+
+If the app still shows Authentication Error, open Render logs and confirm the startup line prints the resolved App ID redirect URI.
 
 ---
 

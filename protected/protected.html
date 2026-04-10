@@ -85,6 +85,17 @@
 ============================================================ -->
     <main class="max-w-7xl mx-auto px-7 py-6">
 
+        <section id="tabInsights" class="bg-white border border-green-pale rounded-2xl shadow-sm mb-6 overflow-hidden">
+            <div class="px-5 py-4 border-b border-green-pale flex items-center justify-between">
+                <div>
+                    <div class="text-[11px] font-semibold tracking-widest uppercase text-gray-400">Section Snapshot</div>
+                    <div id="tabInsightsTitle" class="font-display text-lg font-semibold">Overview</div>
+                </div>
+                <div id="tabInsightsUpdated" class="text-xs text-gray-400">Updated: Just now</div>
+            </div>
+            <div id="tabInsightsGrid" class="px-5 py-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"></div>
+        </section>
+
         <section class="ops-layout mb-6">
             <div class="farmers-panel bg-white border border-green-pale rounded-2xl shadow-sm">
                 <div class="ops-head">Farmer List</div>
@@ -704,38 +715,8 @@
                         </div>
                     </div>
 
-                    <!-- Weather -->
-                    <div class="text-[11px] font-semibold text-gray-400 tracking-widest uppercase mb-3">Weather — Patna
-                        Region</div>
-                    <div class="flex flex-col divide-y divide-green-pale">
-                        <div class="flex items-center gap-3 py-2">
-                            <span class="text-xs text-gray-400 w-10">Today</span>
-                            <span>☀</span>
-                            <div class="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                <div class="h-full rounded-full"
-                                    style="width:82%;background:linear-gradient(90deg,#3B8BD4,#E8A020)"></div>
-                            </div>
-                            <span class="text-sm font-semibold w-10 text-right">36°C</span>
-                        </div>
-                        <div class="flex items-center gap-3 py-2">
-                            <span class="text-xs text-gray-400 w-10">Sat</span>
-                            <span>⛅</span>
-                            <div class="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                <div class="h-full rounded-full"
-                                    style="width:60%;background:linear-gradient(90deg,#3B8BD4,#E8A020)"></div>
-                            </div>
-                            <span class="text-sm font-semibold w-10 text-right">33°C</span>
-                        </div>
-                        <div class="flex items-center gap-3 py-2">
-                            <span class="text-xs text-gray-400 w-10">Sun</span>
-                            <span>🌧</span>
-                            <div class="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                <div class="h-full rounded-full"
-                                    style="width:35%;background:linear-gradient(90deg,#3B8BD4,#E8A020)"></div>
-                            </div>
-                            <span class="text-sm font-semibold w-10 text-right">28°C</span>
-                        </div>
-                    </div>
+                    <div class="text-[11px] font-semibold text-gray-400 tracking-widest uppercase mb-3">Scanned QR Data</div>
+                    <div id="quickQrDataBox" class="qr-data-box">Scan or upload a QR code to view data here.</div>
 
                     <!-- Action Buttons -->
                     <div class="flex gap-2 mt-4">

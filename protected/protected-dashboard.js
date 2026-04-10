@@ -2,7 +2,88 @@
 function setTab(el, tab) {
   document.querySelectorAll('.tab-btn').forEach((t) => t.classList.remove('active'));
   el.classList.add('active');
-  alert('Switching to "' + tab + '" view.\n(Connect your router or SPA framework here.)');
+  renderTabInsights(tab);
+}
+
+const TAB_INSIGHTS_DATA = {
+  overview: {
+    title: 'Overview',
+    updated: 'Updated: 2 min ago',
+    cards: [
+      { label: 'Total Live Batches', value: '2,847', note: '+73 since morning' },
+      { label: 'Districts Active', value: '18', note: 'Patna, Vaishali, Gaya lead' },
+      { label: 'Avg Turnaround', value: '4.6 days', note: 'Farm to market' },
+      { label: 'Revenue Tracked', value: 'Rs 8.42 Cr', note: 'Current season' },
+    ],
+  },
+  batches: {
+    title: 'Crop Batches',
+    updated: 'Updated: 1 min ago',
+    cards: [
+      { label: 'Rice Batches', value: '1,124', note: '39.5% of total' },
+      { label: 'Wheat Batches', value: '918', note: '32.2% of total' },
+      { label: 'Maize Batches', value: '502', note: '17.6% of total' },
+      { label: 'Pulses & Others', value: '303', note: '10.7% of total' },
+    ],
+  },
+  quality: {
+    title: 'Quality Control',
+    updated: 'Updated: 5 min ago',
+    cards: [
+      { label: 'Pass Rate', value: '96.1%', note: 'Above target 95%' },
+      { label: 'Rejected Today', value: '21', note: 'Mostly moisture variance' },
+      { label: 'Avg Moisture', value: '13.2%', note: 'Within safe band' },
+      { label: 'Grade A Output', value: '72%', note: '+4% vs last week' },
+    ],
+  },
+  stakeholders: {
+    title: 'Stakeholders',
+    updated: 'Updated: 3 min ago',
+    cards: [
+      { label: 'Farmers', value: '18,400', note: '1,380 active today' },
+      { label: 'Transporters', value: '1,230', note: '882 trips in progress' },
+      { label: 'Warehouses', value: '284', note: '71% utilization' },
+      { label: 'Retail Sellers', value: '6,720', note: '3,910 orders processed' },
+    ],
+  },
+  analytics: {
+    title: 'Analytics',
+    updated: 'Updated: Just now',
+    cards: [
+      { label: 'On-time Delivery', value: '94.2%', note: 'SLA target 92%' },
+      { label: 'Avg Loss Reduction', value: '28.3%', note: 'vs pre-platform baseline' },
+      { label: 'Avg Margin Gain', value: '+Rs 220/q', note: 'Farmer-side uplift' },
+      { label: 'High-risk Batches', value: '43', note: 'Need temp monitoring' },
+    ],
+  },
+};
+
+function renderTabInsights(tab) {
+  const data = TAB_INSIGHTS_DATA[tab] || TAB_INSIGHTS_DATA.overview;
+  const titleEl = document.getElementById('tabInsightsTitle');
+  const updatedEl = document.getElementById('tabInsightsUpdated');
+  const gridEl = document.getElementById('tabInsightsGrid');
+
+  if (!titleEl || !updatedEl || !gridEl) return;
+
+  titleEl.textContent = data.title;
+  updatedEl.textContent = data.updated;
+  gridEl.innerHTML = data.cards
+    .map(
+      (card) =>
+        '<div class="border border-green-pale rounded-xl p-3">' +
+        '<div class="text-[11px] font-semibold tracking-widest uppercase text-gray-400 mb-1">' +
+        card.label +
+        '</div>' +
+        '<div class="text-2xl font-bold text-gray-900 mb-1">' +
+        card.value +
+        '</div>' +
+        '<div class="text-xs text-gray-500">' +
+        card.note +
+        '</div>' +
+        '</div>'
+    )
+    .join('');
 }
 
 // Stakeholder filter
@@ -57,6 +138,12 @@ function expandStage(el) {
 
 // QR scan zone
 function openScan() {
+  const directInput = document.getElementById('quickQrUploadInput');
+  if (directInput) {
+    directInput.click();
+    return;
+  }
+
   if (typeof window.__openQrUploader === 'function') {
     window.__openQrUploader();
     return;
@@ -88,6 +175,8 @@ function updateClock() {
 
 setInterval(updateClock, 8000);
 
+renderTabInsights('overview');
+
 const FIREBASE_DATABASE_URL = 'https://lithe-transport-492814-r5-default-rtdb.europe-west1.firebasedatabase.app';
 const FIREBASE_AUDIENCE = '59621db6-6a59-43ec-8ce3-0a56d459f0db';
 const FIREBASE_SDK_VERSION = '12.12.0';
@@ -115,6 +204,7 @@ let userAccounts = [];
 let recordsByUser = {};
 let audienceUsersRaw = {};
 let audienceObjectsRaw = {};
+let localCreatedRecordsByTrack = {};
 
 const defaultFarmerTrackingData = [];
 
@@ -237,6 +327,12 @@ function normalizeFarmerRecord(record, fallbackIndex) {
     name: record.name || record.farmerName || record.owner || `Farmer ${fallbackIndex + 1}`,
     village: record.village || record.address || record.location || 'Unknown village',
     address: record.address || record.village || record.location || 'Unknown address',
+    delivery_address:
+      record.delivery_address ||
+      record.deliveryAddress ||
+      record.destination ||
+      record.drop_address ||
+      'Unknown destination',
     van_number: record.van_number || record.vanNumber || record.vehicle || 'N/A',
     trackid: String(trackid),
     route: record.route || record.path || record.journey || 'Route pending',
@@ -826,8 +922,23 @@ function setupScannerPanel() {
   const scanBtn = document.getElementById('scanBtn');
   const createTrackBtn = document.getElementById('createTrackBtn');
   const qrDataBox = document.getElementById('qrDataBox');
+  const quickQrDataBox = document.getElementById('quickQrDataBox');
 
   if (!scanInput || !scanBtn || !qrDataBox) return;
+
+  const setQrText = (text) => {
+    qrDataBox.textContent = text;
+    if (quickQrDataBox) {
+      quickQrDataBox.textContent = text;
+    }
+  };
+
+  const setQrHtml = (html) => {
+    qrDataBox.innerHTML = html;
+    if (quickQrDataBox) {
+      quickQrDataBox.innerHTML = html;
+    }
+  };
 
   const ensureQrLibs = async () => {
     if (!window.QRCode) {
@@ -839,7 +950,7 @@ function setupScannerPanel() {
   };
 
   const formatRecordText = (record) =>
-    `name: ${record.name}\ntrackid: ${record.trackid}\naddress: ${record.address || record.village}\nvan_number: ${record.van_number || 'N/A'}\nstatus: ${record.status}\nroute: ${record.route}`;
+    `name: ${record.name}\ntrackid: ${record.trackid}\naddress: ${record.address || record.village}\ndelivery_address: ${record.delivery_address || 'N/A'}\nvan_number: ${record.van_number || 'N/A'}\nstatus: ${record.status}\nroute: ${record.route}`;
 
   const formatTrackingDetails = (record) => {
     const updates = Array.isArray(record.updates) ? record.updates.slice(0, 5) : [];
@@ -853,6 +964,7 @@ function setupScannerPanel() {
       name: record.name,
       trackid: record.trackid,
       address: record.address || record.village,
+      delivery_address: record.delivery_address || 'N/A',
       van_number: record.van_number || 'N/A',
       route: record.route,
       status: record.status,
@@ -882,7 +994,7 @@ function setupScannerPanel() {
 
   const showRecordData = async (record, withAutoQr, decodedSourceText) => {
     const text = `${formatRecordText(record)}\n${formatTrackingDetails(record)}`;
-    qrDataBox.textContent = text;
+    setQrText(text);
 
     if (!withAutoQr) {
       return;
@@ -897,16 +1009,16 @@ function setupScannerPanel() {
       const source = decodedSourceText
         ? `<div class="qr-source-note">decoded_qr: ${decodedSourceText.replace(/</g, '&lt;')}</div>`
         : '';
-      qrDataBox.innerHTML = `
+      setQrHtml(`
         <div class="qr-readout">${text.replace(/\n/g, '<br>')}</div>
         ${source}
         <div class="qr-generated-wrap">
           <img src="${qrUrl}" alt="Generated QR code" class="qr-generated-img" />
           <a class="qr-download-link" href="${qrUrl}" download="${record.trackid || 'tracking-id'}.png">Download QR Code</a>
         </div>
-      `;
+      `);
     } catch (error) {
-      qrDataBox.textContent = `${text}\n\nQR generation unavailable.`;
+      setQrText(`${text}\n\nQR generation unavailable.`);
     }
   };
 
@@ -922,6 +1034,79 @@ function setupScannerPanel() {
 
     const match = decodedText.match(/TRK-\d+/i);
     return match ? match[0].toUpperCase() : '';
+  };
+
+  const getTrackIdFromFileName = (fileName) => {
+    const match = String(fileName || '').match(/TRK-\d+/i);
+    return match ? match[0].toUpperCase() : '';
+  };
+
+  const parseDecodedRecord = (decodedText) => {
+    try {
+      const parsed = JSON.parse(decodedText);
+      if (parsed && typeof parsed === 'object') {
+        return {
+          name: parsed.name || 'Unknown',
+          trackid: String(parsed.trackid || ''),
+          address: parsed.address || parsed.village || 'Unknown address',
+          delivery_address:
+            parsed.delivery_address ||
+            parsed.deliveryAddress ||
+            parsed.destination ||
+            parsed.drop_address ||
+            'Unknown destination',
+          van_number: parsed.van_number || parsed.vanNumber || 'N/A',
+          status: parsed.status || 'Unknown',
+          route: parsed.route || 'Unknown route',
+          updates: Array.isArray(parsed.updates) ? parsed.updates : [],
+          journeyUpdates: Array.isArray(parsed.journeyUpdates) ? parsed.journeyUpdates : [],
+        };
+      }
+    } catch (error) {
+      // ignore and fallback to line parser
+    }
+
+    const lines = String(decodedText)
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+    const map = {};
+    lines.forEach((line) => {
+      const idx = line.indexOf(':');
+      if (idx > -1) {
+        const key = line.slice(0, idx).trim().toLowerCase();
+        const value = line.slice(idx + 1).trim();
+        map[key] = value;
+      }
+    });
+
+    if (!Object.keys(map).length) {
+      return null;
+    }
+
+    const extractedTrack = getTrackIdFromDecodedText(decodedText) || map.trackid || '';
+    return {
+      name: map.name || 'Unknown',
+      trackid: extractedTrack,
+      address: map.address || map.village || 'Unknown address',
+      delivery_address:
+        map.delivery_address || map.delivery || map.destination || map.drop_address || 'Unknown destination',
+      van_number: map.van_number || map.van || 'N/A',
+      status: map.status || 'Unknown',
+      route: map.route || 'Unknown route',
+      updates: [],
+      journeyUpdates: [],
+    };
+  };
+
+  const findRecordByTrackId = (trackId) => {
+    if (!trackId) return null;
+    const allRecords = getAllTrackingRecords();
+    const fromLive =
+      allRecords.find((item) => String(item.trackid || '').toLowerCase() === trackId.toLowerCase()) || null;
+    if (fromLive) return fromLive;
+
+    return localCreatedRecordsByTrack[String(trackId).toUpperCase()] || null;
   };
 
   const decodeQrFromFile = async (file) => {
@@ -977,16 +1162,15 @@ function setupScannerPanel() {
   const processScan = () => {
     const rawValue = scanInput.value.trim();
     if (!rawValue) {
-      qrDataBox.textContent = 'Please enter QR text or track ID.';
+      setQrText('Please enter QR text or track ID.');
       return null;
     }
 
     const normalized = rawValue.replace(/^QR:/i, '');
-    const allRecords = getAllTrackingRecords();
-    const found = allRecords.find((item) => item.trackid.toLowerCase() === normalized.toLowerCase());
+    const found = findRecordByTrackId(normalized);
 
     if (!found) {
-      qrDataBox.textContent = `No data found for: ${normalized}`;
+      setQrText(`No data found for: ${normalized}`);
       return null;
     }
 
@@ -1021,21 +1205,45 @@ function setupScannerPanel() {
     if (!file) return;
 
     try {
-      qrDataBox.textContent = 'Reading QR image...';
+      setQrText('Reading QR image...');
       const decodedText = await decodeQrFromFile(file);
-      const trackId = getTrackIdFromDecodedText(decodedText);
-      if (!trackId) {
-        qrDataBox.textContent = `QR decoded:\n${decodedText}\n\nNo track ID found in this QR.`;
+      const trackId = getTrackIdFromDecodedText(decodedText) || getTrackIdFromFileName(file.name);
+      const parsedRecord = parseDecodedRecord(decodedText);
+
+      if (trackId) {
+        scanInput.value = trackId;
+      }
+
+      const found = trackId ? findRecordByTrackId(trackId) : null;
+      if (found) {
+        await showRecordData(found, false, decodedText);
+        const owner = Object.entries(recordsByUser).find(([, records]) =>
+          records.some((x) => String(x.trackid || '').toLowerCase() === String(found.trackid || '').toLowerCase()),
+        );
+        if (owner) {
+          selectUserBySub(owner[0]);
+        }
         return;
       }
 
-      scanInput.value = trackId;
-      const found = processScan();
-      if (found) {
-        await showRecordData(found, false, decodedText);
+      if (parsedRecord) {
+        setQrText(`${formatRecordText(parsedRecord)}\n${formatTrackingDetails(parsedRecord)}\n\nSource: Uploaded QR (not linked in current tracking DB)`);
+        return;
       }
+
+      setQrText(`QR decoded:\n${decodedText}\n\nNo track details found in this QR.`);
     } catch (error) {
-      qrDataBox.textContent = 'Unable to read QR from image file. Please upload a clear QR image.';
+      const fallbackTrackFromName = getTrackIdFromFileName(file.name);
+      if (fallbackTrackFromName) {
+        scanInput.value = fallbackTrackFromName;
+        const foundByName = processScan();
+        if (foundByName) {
+          setQrText(`${formatRecordText(foundByName)}\n${formatTrackingDetails(foundByName)}\n\nNote: QR decode failed, matched by file name track ID.`);
+          return;
+        }
+      }
+
+      setQrText('Unable to read QR from image file. Please upload a clear QR image or include track ID in file name like TRK-1234.png.');
     } finally {
       quickQrFileInput.value = '';
     }
@@ -1056,6 +1264,7 @@ function setupScannerPanel() {
           <label>Address<input id="ctAddress" type="text" /></label>
           <label>Track ID<input id="ctTrackid" type="text" /></label>
           <label>Van Number<input id="ctVan" type="text" /></label>
+          <label class="full">Delivery Address<input id="ctDelivery" type="text" /></label>
           <label class="full">Route<input id="ctRoute" type="text" /></label>
         </div>
         <div class="create-track-actions">
@@ -1088,6 +1297,7 @@ function setupScannerPanel() {
     modal.querySelector('#ctAddress').value = '';
     modal.querySelector('#ctTrackid').value = prefillTrackId;
     modal.querySelector('#ctVan').value = 'BR-00-0000';
+    modal.querySelector('#ctDelivery').value = '';
     modal.querySelector('#ctRoute').value = 'Farmer to Market';
     modal.classList.remove('hidden');
 
@@ -1096,9 +1306,11 @@ function setupScannerPanel() {
       const address = modal.querySelector('#ctAddress').value.trim();
       const trackid = modal.querySelector('#ctTrackid').value.trim().toUpperCase();
       const vanNumber = modal.querySelector('#ctVan').value.trim();
-      const route = modal.querySelector('#ctRoute').value.trim();
+      const deliveryAddress = modal.querySelector('#ctDelivery').value.trim();
+      const routeInput = modal.querySelector('#ctRoute').value.trim();
+      const route = routeInput || (deliveryAddress ? `${address} to ${deliveryAddress}` : 'Farmer to Market');
 
-      if (!name || !address || !trackid || !vanNumber || !route) {
+      if (!name || !address || !deliveryAddress || !trackid || !vanNumber || !route) {
         alert('Please fill all fields.');
         return;
       }
@@ -1107,6 +1319,7 @@ function setupScannerPanel() {
         name,
         village: address,
         address,
+        delivery_address: deliveryAddress,
         van_number: vanNumber,
         trackid,
         route,
@@ -1124,11 +1337,12 @@ function setupScannerPanel() {
 
         // Use push() so each new tracking record is appended instead of overwriting an existing key.
         await firebase.database().ref(`${audience}/objects/${subject}`).push(createdRecord);
+        localCreatedRecordsByTrack[createdRecord.trackid] = createdRecord;
         scanInput.value = createdRecord.trackid;
         await showRecordData(createdRecord, true);
         modal.classList.add('hidden');
       } catch (error) {
-        qrDataBox.textContent = 'Failed to save tracking record. Please try again.';
+        setQrText('Failed to save tracking record. Please try again.');
       }
     };
   };
