@@ -154,6 +154,8 @@ function getAppIDConfig() {
 		config.redirectUri = explicitRedirectUri;
 	} else if (productionRedirectUri) {
 		config.redirectUri = productionRedirectUri;
+	} else if (process.env.NODE_ENV !== "production" && !config.redirectUri) {
+		config.redirectUri = `http://localhost:${port}${CALLBACK_URL}`;
 	}
 
 	const resolved = withResolvedRedirectUri(config);
