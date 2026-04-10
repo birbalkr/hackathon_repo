@@ -122,22 +122,27 @@ app.listen(port, () => {
 
 function getAppIDConfig() {
 	let config = null;
+	const explicitRedirectUri = process.env.APPID_REDIRECT_URI;
+	const productionRedirectUri = resolveProductionRedirectUri();
 
 	if (process.env.APPID_SERVICE_BINDING) {
 		config = JSON.parse(process.env.APPID_SERVICE_BINDING);
-		if (process.env.redirectUri) {
-			config.redirectUri = process.env.redirectUri;
-		}
+	} else if (process.env["VCAP_APPLICATION"]) {
+		let vcapApplication = JSON.parse(process.env["VCAP_APPLICATION"]);
+		config = { "redirectUri": "https://" + vcapApplication["application_uris"][0] + CALLBACK_URL };
 	} else {
 		try {
 			// local fallback when service binding env is not present
 			config = require('./localdev-config.json');
 		} catch (e) {
-			if (process.env["VCAP_APPLICATION"]) {
-				let vcapApplication = JSON.parse(process.env["VCAP_APPLICATION"]);
-				config = { "redirectUri": "https://" + vcapApplication["application_uris"][0] + CALLBACK_URL };
-			}
+			config = {};
 		}
+	}
+
+	if (explicitRedirectUri) {
+		config.redirectUri = explicitRedirectUri;
+	} else if (productionRedirectUri) {
+		config.redirectUri = productionRedirectUri;
 	}
 
 	const resolved = withResolvedRedirectUri(config);
@@ -166,6 +171,21 @@ function withResolvedRedirectUri(config) {
 	}
 
 	return resolved;
+}
+
+function resolveProductionRedirectUri() {
+	const baseUrl =
+		process.env.APP_BASE_URL ||
+		process.env.PUBLIC_URL ||
+		process.env.RENDER_EXTERNAL_URL ||
+		(process.env.RENDER_SERVICE_NAME ? `https://${process.env.RENDER_SERVICE_NAME}.onrender.com` : "") ||
+		"";
+
+	if (!baseUrl) {
+		return null;
+	}
+
+	return `${baseUrl.replace(/\/$/, "")}${CALLBACK_URL}`;
 }
 
 function getIdentityPayload(req) {
