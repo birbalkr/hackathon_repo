@@ -16,8 +16,11 @@
     </div>
 
     <ul id="nav-links">
-      <li id="nl-home" class="nav-active">Home<span class="nav-underline"></span></li>
-      <li id="nl-contact">Contact<span class="nav-underline"></span></li>
+      <li  id="nl-home" class="nav-active">
+        <a href="index.html">Home</a>
+        <span class="nav-underline"></span></li>
+      <li id="nl-contact"><a href="contact.html">Contact</a><span class="nav-underline"></span></li>
+      <li id="nl-about"><a href="about.html">About</a><span class="nav-underline"></span></li>
     </ul>
 
     <button class="btn-login" id="nav-login">
@@ -53,6 +56,10 @@
         <div class="stat-num" id="c3">0</div>
         <div class="stat-lbl">Markets reached</div>
       </div>
+    </div>
+    <div class="qr-section">
+      <h3>Scan to Track Crop 📦</h3>
+      <div id="qrcode"></div>
     </div>
   </div>
 
@@ -202,6 +209,24 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
   <script src="stylesheets/script.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script>
+    new QRCode(document.getElementById("qrcode"), {
+  text: "https://kisantrack.com/track?cropId=KC-2024-001",
+  width: 150,
+  height: 150,
+  colorDark: "#000",
+  colorLight: "#fff",
+  correctLevel: QRCode.CorrectLevel.H
+});
+gsap.from("#qrcode", {
+  scale: 0,
+  opacity: 0,
+  duration: 1,
+  ease: "back.out(1.7)"
+});
+  </script>
 </body>
 
 </html>
