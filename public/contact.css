@@ -1,0 +1,47 @@
+.flexgap-8 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 48px;
+    position: sticky;
+    top: 0;
+    z-index: 100
+}
+ ul {
+    display: flex;
+    list-style: none;
+    gap: 6px
+}
+
+ ul li {
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    color: rgba(255, 255, 255, .85);
+    transition: .2s;
+    position: relative
+}
+
+ ul li:hover {
+    background: rgba(255, 255, 255, .15);
+    color: #fff
+}
+
+
+
+.nav-underline {
+    position: absolute;
+    bottom: 4px;
+    left: 16px;
+    right: 16px;
+    height: 2px;
+    background: #FFD54F;
+    border-radius: 2px;
+    transform: scaleX(0);
+    transition: transform .3s
+}
+
+ ul li:hover .nav-underline {
+    transform: scaleX(1)
+}

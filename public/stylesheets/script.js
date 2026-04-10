@@ -236,3 +236,5 @@ fCards.forEach((card, i) => {
     gsap.to(fi, { rotation: 0, scale: 1, duration: 0.4, ease: "power2.out" }),
   );
 });
+
+

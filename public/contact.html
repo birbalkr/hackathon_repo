@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact - KisanTrack</title>
+
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<link rel="stylesheet" href="contact.css">
+</head>
+
+<body class="bg-green-900 text-white">
+
+<!-- NAVBAR -->
+<nav class="flex justify-between items-center px-10 py-4 bg-green-800">
+  <div class="flex items-center gap-3">
+    <img src="./images/kisan.jpeg" class="w-12 h-12 rounded-full">
+    <h1 class="text-xl font-bold">KisanTrack</h1>
+  </div>
+<div class="nav">
+  <ul class="flexgap-8">
+    <li><a href="index.html" class="hover:text-yellow-300">Home</a><span class="nav-underline"></span></li>
+    <li class="text-yellow-300 font-bold">Contact<span class="nav-underline"></span></li>
+    <li><a href="about.html" class="hover:text-yellow-300">About</a><span class="nav-underline"></span></li>
+    
+  </ul>
+  </div>
+
+  <button class="bg-yellow-400 text-black px-5 py-2 rounded-full font-semibold">
+    Login
+  </button>
+</nav>
+
+<!-- HERO -->
+<section class="text-center py-20">
+  <h1 id="title" class="text-5xl font-bold mb-5">Contact Us 📞</h1>
+  <p id="subtitle" class="text-green-200 text-lg">
+    We’d love to hear from you. Get in touch with us!
+  </p>
+</section>
+
+<!-- CONTACT SECTION -->
+<section class="bg-green-100 text-black py-16 px-10">
+
+  <div class="max-w-5xl mx-auto grid md:grid-cols-2 gap-10">
+
+    <!-- LEFT INFO -->
+    <div class="space-y-6 contact-box">
+      <h2 class="text-3xl font-bold">Get in Touch</h2>
+
+      <p>
+        Have questions about crop tracking, supply chain transparency, or KisanTrack services?
+        Reach out to us and we will get back to you soon.
+      </p>
+
+      <div class="space-y-3">
+        <p>📍 Location: Jharkhand, India</p>
+        <p>📧 Email: info@kisantrack.com</p>
+        <p>📞 Phone: +91-XXXXXXXXXX</p>
+      </div>
+    </div>
+
+    <!-- RIGHT FORM -->
+    <form class="bg-white p-6 rounded-xl shadow-lg space-y-4 contact-box">
+
+      <input type="text" placeholder="Your Name"
+        class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+
+      <input type="email" placeholder="Your Email"
+        class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+
+      <textarea placeholder="Your Message"
+        class="w-full p-3 border rounded-lg h-32 focus:outline-none focus:ring-2 focus:ring-green-500"></textarea>
+
+      <button type="submit"
+        class="w-full bg-green-700 text-white py-3 rounded-lg hover:bg-green-600 transition">
+        Send Message 🚀
+      </button>
+
+    </form>
+
+  </div>
+
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-green-800 text-center py-5">
+  <p>© 2026 KisanTrack | All Rights Reserved</p>
+</footer>
+
+<!-- GSAP -->
+<script>
+gsap.from("#title", {y: -50, opacity: 0, duration: 1});
+gsap.from("#subtitle", {y: 30, opacity: 0, duration: 1, delay: 0.5});
+gsap.from(".contact-box", {
+  y: 50,
+  opacity: 0,
+  duration: 1,
+  stagger: 0.3,
+  delay: 0.8
+});
+</script>
+
+</body>
+</html>
